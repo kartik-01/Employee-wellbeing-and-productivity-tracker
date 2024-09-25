@@ -1,0 +1,20 @@
+# Node modules
+node_modules/
+
+# Build directories
+build/
+dist/
+
+# Maven build directory
+target/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
