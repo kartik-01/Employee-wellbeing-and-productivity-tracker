@@ -1,4 +1,4 @@
-# CMPE-272-ProdWell
+# CMPE-272-ProdWell : Team 7
 
 ## AI-Driven Employee Wellness and Productivity Tracker
 
