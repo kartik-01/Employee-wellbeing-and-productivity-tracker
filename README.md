@@ -1,32 +1,59 @@
-# CMPE-272-ProdWell : Team 7
+# CMPE-272-Team7-ProdWell
 
 ## AI-Driven Employee Wellness and Productivity Tracker
+The AI-Driven Employee Wellbeing and Productivity Tracker is designed to help organizations monitor and improve the mental wellbeing and productivity of their employees. It aims to provide insights into stress levels and suggest personalized interventions to ensure that employees maintain a healthy work-life balance, enhancing their productivity and wellbeing. The system gathers data through surveys and analyzes the information using Azure AI Services to offer meaningful recommendations to employees.
 
-**Objective**: Build an AI-based platform that tracks employee productivity metrics (e.g., project completion rates, time spent on tasks) and correlates them with wellness data (e.g., stress levels, absenteeism, survey responses).<br />
-**Novelty**: The platform should suggest personalized interventions (break times, counseling) and productivity boosters using AI models trained on behavioral data.<br />
-**Enterprise** Use: Improves employee well-being and enhances productivity across teams.<br />
+## Architecture
 
-### 1. HR Manager (Elena, 45)
-**Role**: Director of HR
-**Goals**: Improve retention and morale; reduce burnout.<br/>
-**Challenges**: Needs real-time wellness insights; balance productivity and well-being.<br />
-**Platform Benefit**: Provides holistic wellness data for proactive support.<br />
-**Pain Points**: Concerned about privacy and employee perceptions.<br />
-### 2. Team Leader (David, 38)
-**Role**: Project Manager<br />
-**Goals**: Boost productivity without burnout.<br />
-**Challenges**: Needs better performance visibility without micromanaging.<br />
-**Platform Benefit**: Offers data-driven wellness and productivity insights.<br />
-**Pain Points**: Worried about tool overload or distraction.<br />
-### 3. Employee (Sophia, 29)<br />
-**Role**: Software Developer<br />
-**Goals**: Maintain work-life balance while staying productive.<br />
-**Challenges**: Struggles with burnout and stress.<br />
-**Platform Benefit**: Personalized recommendations to reduce stress and improve focus.<br />
-**Pain Points**: Concerns about being monitored.<br />
-### 4. Data Scientist (Maya, 34)
-**Role**: AI Model Developer<br />
-**Goals**: Refine AI models to improve wellness recommendations.<br />
-**Challenges**: Correlating productivity with wellness while ensuring privacy.<br />
-**Platform Benefit**: Provides data for predictive models and tailored suggestions.<br />
-**Pain Points**: Ethical concerns around data use.<br />
+Below is a block diagram of the architecture:
+
+![image](https://github.com/user-attachments/assets/407a25fd-0a0e-431f-9e6d-c40f713ac2a1)
+
+## Explanation
+1. Landing Page (React): Users land on the landing page where they can sign up or sign in using Azure AD B2C.<br/>
+2. Azure AD B2C: Handles the authentication process by providing a secure sign-up/sign-in experience.<br/>
+3. Spring Boot Backend: Handles REST API calls, manages the flow between the frontend and database, and communicates with Azure AI services.<br/>
+4. MongoDB: Stores survey data related to personality and productivity.<br/>
+5. Azure AI Services: Analyzes collected data to calculate stress levels and provides recommendations such as break times, counseling, and other personalized interventions.<br/>
+
+## Use Cases
+* Employee Wellbeing: Calculate stress levels and suggest personalized wellbeing interventions based on personality and productivity data.<br/>
+* Productivity Tracking: Track work-related data such as weekly task completion to visualize productivity trends and identify areas for improvement.<br/>
+* Personalized Recommendations: Provide personalized interventions, such as break time notifications, hobbies suggestions, or counseling options based on survey inputs and analysis.<br/>
+
+## Persona Summary
+* Employees: Individuals looking to monitor and improve their productivity and mental wellbeing.<br/>
+* HR Teams: Human resource professionals interested in assessing employee stress levels and productivity trends to improve work culture.<br/>
+* Managers: Team leaders who want to enhance productivity while ensuring their team’s wellbeing.<br/>
+
+## Technologies Used
+* Frontend: React for building the landing page UI.<br/>
+* Backend: Spring Boot for managing business logic and data flow.<br/>
+* Authentication: Azure AD B2C for secure user authentication.<br/>
+* Database: MongoDB for storing survey data.<br/>
+* AI Services: Azure AI Services for analyzing data and providing personalized recommendations.<br/>
+
+## Explanation
+1. Landing Page (React): Users land on the landing page where they can sign up or sign in using Azure AD B2C.<br/>
+2. Azure AD B2C: Handles the authentication process by providing a secure sign-up/sign-in experience.<br/>
+3. Spring Boot Backend: Handles REST API calls, manages the flow between the frontend and database, and communicates with Azure AI services.<br/>
+4. MongoDB: Stores survey data related to personality and productivity.<br/>
+5. Azure AI Services: Analyzes collected data to calculate stress levels and provides recommendations such as break times, counseling, and other personalized interventions.<br/>
+
+## Use Cases
+* Employee Wellbeing: Calculate stress levels and suggest personalized wellbeing interventions based on personality and productivity data.<br/>
+* Productivity Tracking: Track work-related data such as weekly task completion to visualize productivity trends and identify areas for improvement.<br/>
+* Personalized Recommendations: Provide personalized interventions, such as break time notifications, hobbies suggestions, or counseling options based on survey inputs and analysis.<br/>
+
+## Persona Summary
+* Employees: Individuals looking to monitor and improve their productivity and mental wellbeing.<br/>
+* HR Teams: Human resource professionals interested in assessing employee stress levels and productivity trends to improve work culture.<br/>
+* Managers: Team leaders who want to enhance productivity while ensuring their team’s wellbeing.<br/>
+
+## Technologies Used
+* **Frontend**: React for building the landing page UI.<br/>
+* **Backend**: Spring Boot for managing business logic and data flow.<br/>
+* **Authentication**: Azure AD B2C for secure user authentication.<br/>
+* **Database**: MongoDB for storing survey data.<br/>
+* **AI Services**: Azure AI Services for analyzing data and providing personalized recommendations.<br/>
+
