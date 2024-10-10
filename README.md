@@ -19,7 +19,7 @@ Below is a block diagram of the architecture:
 ## Use Cases
 * Employee Wellbeing: Calculate stress levels and suggest personalized wellbeing interventions based on personality and productivity data.<br/>
 * Productivity Tracking: Track work-related data such as weekly task completion to visualize productivity trends and identify areas for improvement.<br/>
-* Personalized Recommendations: Provide personalized interventions, such as break time notifications, hobbies suggestions, or counseling options based on survey inputs and analysis.<br/>
+* Personalized Recommendations: Provide personalized interventions, such as break time notifications, suggestions based on the user's hobbies, likes/dislikes, or counseling options based on survey inputs and analysis of stress levels.<br/>
 
 ## Persona Summary
 * Employees: Individuals looking to monitor and improve their productivity and mental wellbeing.<br/>
@@ -27,9 +27,9 @@ Below is a block diagram of the architecture:
 * Managers: Team leaders who want to enhance productivity while ensuring their team’s wellbeing.<br/>
 
 ## Technologies Used
-* Frontend: React for building the landing page UI.<br/>
+* Frontend: React for building the UI components.<br/>
+* Azure AD B2C: For secure user authentication.<br/>
 * Backend: Spring Boot for managing business logic and data flow.<br/>
-* Authentication: Azure AD B2C for secure user authentication.<br/>
-* Database: MongoDB for storing survey data.<br/>
+* Database: MongoDB for storing user data, productivity metrics and survey data.<br/>
 * AI Services: Azure AI Services for analyzing data and providing personalized recommendations.<br/>
 
