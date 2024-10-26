@@ -1,0 +1,60 @@
+.navbar {
+    padding-left: 20px; /* Adjust as needed */
+    padding-right: 20px; /* Adjust as needed */
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+}
+
+.nav-link {
+    margin-right: 15px; /* Adjust as needed */
+}
+
+.btn-primary {
+    margin-left: auto;
+    margin-right: 20px; /* Adjust as needed */
+    background-color: #6200ea;
+    border-color: #6200ea;
+}
+
+.custom-navbar {
+    padding-left: 30px;
+    padding-right: 30px;
+    height: 80px; /* Increase vertical size */
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.nav-link {
+    margin-right: 15px;
+}
+
+.small-btn {
+    margin-right: 50px;
+    background-color: #6200ea;
+    border-color: #6200ea;
+    font-size: 15px; /* Smaller font size */
+}
+
+.custom-navbar .btn-primary, 
+.custom-navbar .btn-primary, 
+.custom-navbar .small-btn {
+    background-color: #6200ea !important;
+    border-color: #6200ea !important;
+    color: white !important;
+    transition: all 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.custom-navbar .btn-primary:hover, 
+.custom-navbar .small-btn:hover {
+    background-color: white !important;
+    border-color: #6200ea !important;
+    color: #6200ea !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+}
