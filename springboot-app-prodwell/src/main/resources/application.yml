@@ -1,5 +1,5 @@
 spring:
   data:
     mongodb:
-      uri: mongodb+srv://vyshnavi01dp:vyshnavi123@sjsu.zgadi.mongodb.net/?retryWrites=true&w=majority&appName=sjsu
-      database: Tasks
+      uri: mongodb+srv://kartikchindarkar01:muaraK6k5jM8so36@sjsu.zgadi.mongodb.net/?retryWrites=true&w=majority&appName=sjsu
+      database: prodwellDB

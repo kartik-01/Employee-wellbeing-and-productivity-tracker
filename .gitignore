@@ -12,6 +12,11 @@ target/
 .idea/
 *.iml
 .vscode/
+.metadata
+.project
+.factorypath
+.settings
+.classpath
 
 # Logs
 *.log
