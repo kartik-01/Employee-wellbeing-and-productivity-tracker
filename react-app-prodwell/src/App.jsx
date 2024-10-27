@@ -10,6 +10,7 @@ import { compareIssuingPolicy } from './utils/claimUtils';
 import { ChakraProvider } from '@chakra-ui/react'
 import userService from './services/userService';
 import { LandingPage } from './pages/LandingPage';
+import SurveyPage from './pages/Survey';
 
 import './styles/App.css';
 
@@ -99,6 +100,7 @@ const Pages = () => {
         <Routes>
             <Route path="/todolist" element={<TodoList />} />
             <Route path="/" element={<LandingPage />} />
+            <Route path="/survey" element={<SurveyPage />} />
         </Routes>
     );
 };
