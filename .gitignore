@@ -13,10 +13,10 @@ target/
 *.iml
 .vscode/
 .metadata
-.project
-.factorypath
-.settings
-.classpath
+**/.project
+**/.factorypath
+**/.settings
+**/.classpath
 
 # Logs
 *.log
