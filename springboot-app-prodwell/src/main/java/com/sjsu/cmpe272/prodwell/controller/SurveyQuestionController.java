@@ -2,6 +2,7 @@ package com.sjsu.cmpe272.prodwell.controller;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -40,7 +41,7 @@ public class SurveyQuestionController {
 
     // Endpoint to get a survey question by questionId
     @GetMapping("/{questionId}")
-    public SurveyQuestion getSurveyQuestionById(@PathVariable int questionId) {
+    public SurveyQuestion getSurveyQuestionById(@PathVariable ObjectId questionId) {
         return surveyQuestionService.getSurveyQuestionById(questionId);
     }
 
@@ -53,7 +54,7 @@ public class SurveyQuestionController {
 
     // Endpoint to update an existing survey question
     @PutMapping("/{id}")
-    public SurveyQuestion updateSurveyQuestion(@PathVariable String id, @RequestBody SurveyQuestion surveyQuestion) {
+    public SurveyQuestion updateSurveyQuestion(@PathVariable ObjectId id, @RequestBody SurveyQuestion surveyQuestion) {
         surveyQuestion.setId(id);
         return surveyQuestionService.updateSurveyQuestion(surveyQuestion);
     }
@@ -61,7 +62,7 @@ public class SurveyQuestionController {
     // Endpoint to delete a survey question by ID
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteSurveyQuestion(@PathVariable String id) {
+    public void deleteSurveyQuestion(@PathVariable ObjectId id) {
         surveyQuestionService.deleteSurveyQuestion(id);
     }
 }

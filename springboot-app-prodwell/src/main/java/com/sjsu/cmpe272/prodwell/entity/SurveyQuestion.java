@@ -1,5 +1,6 @@
 package com.sjsu.cmpe272.prodwell.entity;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -14,8 +15,7 @@ import lombok.NoArgsConstructor;
 public class SurveyQuestion {
 
     @Id
-    private String id;
-    private int questionId;
+    private ObjectId id;
     private String category;
     private String question;
 }

@@ -3,6 +3,7 @@ package com.sjsu.cmpe272.prodwell.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,16 +27,13 @@ public class SurveyQuestionService {
     }
 
     // Method to get a survey question by questionId
-    public SurveyQuestion getSurveyQuestionById(int questionId) {
+    public SurveyQuestion getSurveyQuestionById(ObjectId questionId) {
         return surveyQuestionRepository.getSurveyQuestionById(questionId);
     }
 
     // Method to add a new survey question
     public SurveyQuestion addSurveyQuestion(SurveyQuestion surveyQuestion) {
         // Assign a unique ID to the survey question if not already set
-        if (surveyQuestion.getId() == null) {
-            surveyQuestion.setId(UUID.randomUUID().toString());
-        }
         return surveyQuestionRepository.save(surveyQuestion);
     }
 
@@ -45,7 +43,7 @@ public class SurveyQuestionService {
     }
 
     // Method to delete a survey question by ID
-    public void deleteSurveyQuestion(String id) {
+    public void deleteSurveyQuestion(ObjectId id) {
         surveyQuestionRepository.deleteById(id);
     }
 }
