@@ -10,13 +10,15 @@ import { compareIssuingPolicy } from './utils/claimUtils';
 import { ChakraProvider } from '@chakra-ui/react'
 import userService from './services/userService';
 import { LandingPage } from './pages/LandingPage';
-import SurveyPage from './pages/Survey';
+import { SurveyPage } from './pages/Survey';
+import { useNavigate } from "react-router-dom";
+
 
 import './styles/App.css';
 
 const Pages = () => {
     const { instance } = useMsal();
-
+    const navigate = useNavigate();
     useEffect(() => {
         const callbackId = instance.addEventCallback((event) => {
             if (
@@ -28,7 +30,8 @@ const Pages = () => {
                 if (idToken) {
                     sessionStorage.setItem('msal.id.token', idToken);
                 }
-
+ // Redirect to the Survey page
+ navigate("/survey");
                 // Extract required user data from idTokenClaims
                 const userData = {
                     oid: event.payload.idTokenClaims.oid,
@@ -94,7 +97,7 @@ const Pages = () => {
                 instance.removeEventCallback(callbackId);
             }
         };
-    }, [instance]);
+    }, [instance,navigate]);
 
     return (
         <Routes>

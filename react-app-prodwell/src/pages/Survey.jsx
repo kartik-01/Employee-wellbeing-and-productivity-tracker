@@ -1,8 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaArrowRight, FaArrowLeft } from 'react-icons/fa';
+import { MsalAuthenticationTemplate } from '@azure/msal-react';
+import { InteractionType } from '@azure/msal-browser';
+import { loginRequest } from "../authConfig";
 
-const SurveyPage = () => {
+export const SurveyPage = () => {
+  const authRequest = {
+    ...loginRequest,
+  };
+
+  return (
+    <MsalAuthenticationTemplate 
+      interactionType={InteractionType.Redirect} 
+      authenticationRequest={authRequest}
+    >
+      <SurveyPageContent />
+    </MsalAuthenticationTemplate>
+  );
+};
+
+const SurveyPageContent = () => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
@@ -201,9 +219,33 @@ const SurveyPage = () => {
     }
   };
 
+  const handleOtherTextChange = (questionId, value) => {
+    setSelectedAnswers({
+      ...selectedAnswers,
+      [`other-${questionId}`]: value,
+    });
+  };
+
   const handleNext = async () => {
+    const currentQuestion = questions[currentQuestionIndex];
     if (isAnswerValid(currentQuestionIndex)) {
-      const currentQuestion = questions[currentQuestionIndex];
+      // If "Other" is selected and has text, replace "Other (Please specify)" with the actual text
+      if (currentQuestion.type === 'multiSelect' && selectedAnswers[`other-${currentQuestion.questionId}`]) {
+        const updatedAnswers = selectedAnswers[currentQuestion.questionId].map((item) =>
+          item === 'Other (Please specify)'
+            ? selectedAnswers[`other-${currentQuestion.questionId}`]
+            : item
+        );
+        setSelectedAnswers((prev) => {
+          const { [`other-${currentQuestion.questionId}`]: removed, ...rest } = prev;
+          return {
+            ...rest,
+            [currentQuestion.questionId]: updatedAnswers,
+          };
+        });
+        
+      }
+
       const answerPayload = {
         userId: "", // Replace with actual user ID if available
         questionId: currentQuestion.questionId,
@@ -323,7 +365,7 @@ const SurveyPage = () => {
                       type="text"
                       placeholder="Please specify"
                       value={selectedAnswers[`other-${currentQuestion.questionId}`] || ''}
-                      onChange={(e) => handleAnswerChange(`other-${currentQuestion.questionId}`, e.target.value)}
+                      onChange={(e) => handleOtherTextChange(currentQuestion.questionId, e.target.value)}
                       className="ml-2 p-1 border rounded w-full"
                       required
                     />
@@ -374,4 +416,3 @@ const SurveyPage = () => {
   );
 };
 
-export default SurveyPage;
