@@ -1,65 +1,51 @@
 package com.sjsu.cmpe272.prodwell.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.sjsu.cmpe272.prodwell.entity.Task;
 import com.sjsu.cmpe272.prodwell.service.TaskService;
+import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "http://localhost:3000")
+import java.util.List;
+
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
 
-	@Autowired
-	private TaskService service;
-	
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	public Task createTask(@RequestBody Task task) {
-		return service.addTask(task);
-	}
-	
-	@GetMapping
-	public List<Task> getTasks(){
-		return service.findAllTasks();
-	}
-	
-	@GetMapping("/{taskId}")
-	public Task getTask(String taskId) {
-		return service.getTasksByTaskId(taskId);
-	}
-	
-	@GetMapping("/severity/{severity}")
-    public List<Task> getTasksBySeverity(@PathVariable int severity) {
-        return service.getTaskBySeverity(severity);
+    @Autowired
+    private TaskService taskService;
+
+    // Endpoint to create a new task
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Task createTask(@RequestBody Task task) {
+        return taskService.saveTask(task);
     }
-    
-    @GetMapping("/assignee/{assignee}")
-    public List<Task> getTasksByAssignee(@PathVariable String assignee) {
-        return service.getTaskByAssignee(assignee);
+
+    // Endpoint to get all tasks assigned to a specific user
+    @GetMapping("/user/{userId}")
+    public List<Task> getTasksByUserId(@PathVariable ObjectId userId) {
+        return taskService.getTasksByUserId(userId);
     }
-    
-    @PutMapping
-    public Task updateTask(@RequestBody Task task) {
-        return service.updateTask(task);
+
+    // Endpoint to get a task by its ID
+    @GetMapping("/{taskId}")
+    public Task getTaskById(@PathVariable ObjectId taskId) {
+        return taskService.getTaskById(taskId);
     }
-    
+
+    // Endpoint to update an existing task
+    @PutMapping("/{taskId}")
+    public Task updateTask(@PathVariable ObjectId taskId, @RequestBody Task task) {
+        task.setId(taskId);
+        return taskService.updateTask(task);
+    }
+
+    // Endpoint to delete a task by its ID
     @DeleteMapping("/{taskId}")
-    public String deleteTask(@PathVariable String taskId) {
-        return service.deleteTask(taskId);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTask(@PathVariable ObjectId taskId) {
+        taskService.deleteTask(taskId);
     }
-	
 }
