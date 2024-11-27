@@ -18,4 +18,6 @@ public class SurveyQuestion {
     private ObjectId id;
     private String category;
     private String question;
+    private String type;
+    private String[] options;
 }
