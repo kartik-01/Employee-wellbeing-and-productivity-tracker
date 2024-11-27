@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MsalProvider, useMsal } from '@azure/msal-react';
 import { EventType } from '@azure/msal-browser';
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { PageLayout } from './components/PageLayout';
 import { TodoList } from './pages/TodoList';
 import { Home } from './pages/Home';
@@ -12,26 +12,29 @@ import userService from './services/userService';
 import { LandingPage } from './pages/LandingPage';
 import { SurveyPage } from './pages/Survey';
 import { useNavigate } from "react-router-dom";
-
+import { DashboardPage } from './pages/Dashboard';
 
 import './styles/App.css';
 
 const Pages = () => {
-    const { instance } = useMsal();
+    const { instance, accounts } = useMsal();
     const navigate = useNavigate();
+    const location = useLocation(); // Get current route information
+    const [initialRedirectDone, setInitialRedirectDone] = useState(false); // Flag to track the initial redirect
+
     useEffect(() => {
         const callbackId = instance.addEventCallback((event) => {
             if (
                 (event.eventType === EventType.LOGIN_SUCCESS || event.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) &&
-                event.payload.account
+                event.payload.account &&
+                !initialRedirectDone // Only redirect if initial redirect hasn't been done
             ) {
                 // Store the ID token in session storage
                 const idToken = event.payload.idToken;
                 if (idToken) {
                     sessionStorage.setItem('msal.id.token', idToken);
                 }
- // Redirect to the Survey page
- navigate("/survey");
+
                 // Extract required user data from idTokenClaims
                 const userData = {
                     oid: event.payload.idTokenClaims.oid,
@@ -41,7 +44,7 @@ const Pages = () => {
                     country: event.payload.idTokenClaims.country,
                     city: event.payload.idTokenClaims.city
                 };
-                
+
                 // Call the backend to check and create user if not exists
                 userService.checkAndCreateUser(userData)
                     .then(response => {
@@ -50,6 +53,14 @@ const Pages = () => {
                     .catch(error => {
                         console.error('Error checking/creating user:', error);
                     });
+
+                // Redirect to the Survey page, but only if not already on it
+                if (location.pathname !== "/survey") {
+                    navigate("/survey");
+                }
+                
+                // Set the redirect done flag to true to prevent repeated redirects
+                setInitialRedirectDone(true);
 
                 if (compareIssuingPolicy(event.payload.idTokenClaims, b2cPolicies.names.editProfile)) {
                     const originalSignInAccount = instance
@@ -97,13 +108,14 @@ const Pages = () => {
                 instance.removeEventCallback(callbackId);
             }
         };
-    }, [instance,navigate]);
+    }, [instance, navigate, location, initialRedirectDone]);
 
     return (
         <Routes>
             <Route path="/todolist" element={<TodoList />} />
             <Route path="/" element={<LandingPage />} />
             <Route path="/survey" element={<SurveyPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
         </Routes>
     );
 };
@@ -111,11 +123,11 @@ const Pages = () => {
 const App = ({ instance }) => {
     return (
         <ChakraProvider>
-        <MsalProvider instance={instance}>
-            <PageLayout>
-                <Pages />
-            </PageLayout>
-        </MsalProvider>
+            <MsalProvider instance={instance}>
+                <PageLayout>
+                    <Pages />
+                </PageLayout>
+            </MsalProvider>
         </ChakraProvider>
     );
 };
