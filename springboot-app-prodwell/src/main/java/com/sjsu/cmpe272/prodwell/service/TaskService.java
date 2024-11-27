@@ -14,27 +14,27 @@ public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
 
-    public Task addTask(Task task) {
+    // Save a new task
+    public Task saveTask(Task task) {
         return taskRepository.save(task);
     }
 
+    // Get all tasks assigned to a user
+    public List<Task> getTasksByUserId(ObjectId userId) {
+        return taskRepository.findByUserId(userId);
+    }
+
+    // Get task by its ID
     public Task getTaskById(ObjectId id) {
         return taskRepository.findById(id).orElse(null);
     }
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    // Update an existing task
+    public Task updateTask(Task task) {
+        return taskRepository.save(task);
     }
 
-    public Task updateTask(ObjectId id, Task updatedTask) {
-        Task existingTask = getTaskById(id);
-        if (existingTask != null) {
-            updatedTask.setId(id);
-            return taskRepository.save(updatedTask);
-        }
-        return null;
-    }
-
+    // Delete task by its ID
     public void deleteTask(ObjectId id) {
         taskRepository.deleteById(id);
     }

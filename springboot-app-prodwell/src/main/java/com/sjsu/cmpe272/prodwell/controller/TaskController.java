@@ -16,30 +16,36 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
+    // Endpoint to create a new task
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Task createTask(@RequestBody Task task) {
-        return taskService.addTask(task);
+        return taskService.saveTask(task);
     }
 
-    @GetMapping("/{id}")
-    public Task getTask(@PathVariable ObjectId id) {
-        return taskService.getTaskById(id);
+    // Endpoint to get all tasks assigned to a specific user
+    @GetMapping("/user/{userId}")
+    public List<Task> getTasksByUserId(@PathVariable ObjectId userId) {
+        return taskService.getTasksByUserId(userId);
     }
 
-    @GetMapping
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+    // Endpoint to get a task by its ID
+    @GetMapping("/{taskId}")
+    public Task getTaskById(@PathVariable ObjectId taskId) {
+        return taskService.getTaskById(taskId);
     }
 
-    @PutMapping("/{id}")
-    public Task updateTask(@PathVariable ObjectId id, @RequestBody Task updatedTask) {
-        return taskService.updateTask(id, updatedTask);
+    // Endpoint to update an existing task
+    @PutMapping("/{taskId}")
+    public Task updateTask(@PathVariable ObjectId taskId, @RequestBody Task task) {
+        task.setId(taskId);
+        return taskService.updateTask(task);
     }
 
-    @DeleteMapping("/{id}")
+    // Endpoint to delete a task by its ID
+    @DeleteMapping("/{taskId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTask(@PathVariable ObjectId id) {
-        taskService.deleteTask(id);
+    public void deleteTask(@PathVariable ObjectId taskId) {
+        taskService.deleteTask(taskId);
     }
 }

@@ -17,6 +17,7 @@ public class Task {
 
     @Id
     private ObjectId id;
+    private ObjectId userId;
     private String taskName;
     private LocalDate assignedDate;
     private LocalDate deadlineDate;
