@@ -9,17 +9,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Document(collection = "surveyAnswers")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SurveyAnswer {
-
+public abstract class BaseSurveyAnswer {
     @Id
     private ObjectId id;
     private ObjectId questionId;
     private ObjectId userId;
     private String answer;
     private LocalDateTime dateTime;
-
 }
