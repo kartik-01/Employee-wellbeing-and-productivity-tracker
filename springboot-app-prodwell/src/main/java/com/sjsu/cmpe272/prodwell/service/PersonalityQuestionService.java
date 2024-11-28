@@ -25,6 +25,10 @@ public class PersonalityQuestionService {
         return repository.save(question);
     }
 
+    public List<PersonalityQuestion> addMultiple(List<PersonalityQuestion> questions) {
+        return repository.saveAll(questions);  // Saves the entire list of questions
+    }
+
     public PersonalityQuestion update(PersonalityQuestion question) {
         return repository.save(question);
     }

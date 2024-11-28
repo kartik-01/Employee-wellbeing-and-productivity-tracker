@@ -4,6 +4,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.sjsu.cmpe272.prodwell.entity.PersonalityQuestion;
 import com.sjsu.cmpe272.prodwell.service.PersonalityQuestionService;
@@ -16,7 +17,7 @@ public class PersonalityQuestionController {
     @Autowired
     private PersonalityQuestionService service;
 
-    @GetMapping
+    @GetMapping("/")
     public List<PersonalityQuestion> getAll() {
         return service.getAll();
     }
@@ -26,10 +27,15 @@ public class PersonalityQuestionController {
         return service.getById(id);
     }
 
-    @PostMapping
+    @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
     public PersonalityQuestion add(@RequestBody PersonalityQuestion question) {
         return service.add(question);
+    }
+
+    @PostMapping("/bulk")
+    public List<PersonalityQuestion> addMultipleQuestions(@RequestBody List<PersonalityQuestion> questions) {
+        return service.addMultiple(questions);
     }
 
     @PutMapping("/{id}")
