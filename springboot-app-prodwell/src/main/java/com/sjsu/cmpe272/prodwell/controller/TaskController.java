@@ -17,7 +17,7 @@ public class TaskController {
     private TaskService taskService;
 
     // Endpoint to create a new task
-    @PostMapping
+    @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
     public Task createTask(@RequestBody Task task) {
         return taskService.saveTask(task);

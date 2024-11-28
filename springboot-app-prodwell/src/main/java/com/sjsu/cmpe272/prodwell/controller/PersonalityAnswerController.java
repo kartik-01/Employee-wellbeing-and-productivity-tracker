@@ -16,7 +16,7 @@ public class PersonalityAnswerController {
     @Autowired
     private PersonalityAnswerService service;
 
-    @PostMapping
+    @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
     public PersonalityAnswer recordAnswer(@RequestBody PersonalityAnswer answer) {
         return service.saveAnswer(answer);
