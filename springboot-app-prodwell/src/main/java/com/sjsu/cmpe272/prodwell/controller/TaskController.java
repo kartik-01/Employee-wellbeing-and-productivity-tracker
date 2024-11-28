@@ -23,6 +23,13 @@ public class TaskController {
         return taskService.saveTask(task);
     }
 
+    // Endpoint to bulk upload tasks
+    @PostMapping("/bulk")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<Task> createTasks(@RequestBody List<Task> tasks) {
+        return taskService.saveTasks(tasks);
+    }
+
     // Endpoint to get all tasks assigned to a specific user
     @GetMapping("/user/{userId}")
     public List<Task> getTasksByUserId(@PathVariable ObjectId userId) {
