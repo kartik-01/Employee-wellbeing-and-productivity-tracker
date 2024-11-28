@@ -55,9 +55,16 @@ const Pages = () => {
                     });
 
                 // Redirect to the Survey page, but only if not already on it
+               // Logic to be updated
+               if (event.payload.idTokenClaims.given_name && event.payload.idTokenClaims.given_name.trim() == "Vyshnavi") {
                 if (location.pathname !== "/survey") {
                     navigate("/survey");
                 }
+            } else {
+                if (location.pathname !== "/dashboard") {
+                    navigate("/dashboard");
+                }
+            }
                 
                 // Set the redirect done flag to true to prevent repeated redirects
                 setInitialRedirectDone(true);

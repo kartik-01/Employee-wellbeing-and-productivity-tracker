@@ -6,12 +6,10 @@ import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
 import { useNavigate } from 'react-router-dom';
 
-
 export const SurveyPage = () => {
   const authRequest = {
     ...loginRequest,
   };
-
   return (
     <MsalAuthenticationTemplate 
       interactionType={InteractionType.Redirect} 
