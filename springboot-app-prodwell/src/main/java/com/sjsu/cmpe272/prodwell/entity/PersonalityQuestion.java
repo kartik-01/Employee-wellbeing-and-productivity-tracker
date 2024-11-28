@@ -1,12 +1,18 @@
 package com.sjsu.cmpe272.prodwell.entity;
 
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+
+import java.util.List;
 
 @Document(collection = "personalityQuestions")
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class PersonalityQuestion extends BaseSurveyQuestion {
-//    private String personalityTrait;
+public class PersonalityQuestion {
+@Id
+    private ObjectId id;
+    private String question;
+    private String type;
+    private List<String> options;
 }
