@@ -9,6 +9,8 @@ import App from "./App.jsx";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles/index.css";
+import './index.css';
+
 
 /**
 * MSAL should be instantiated outside of the component tree to prevent it from being re-instantiated on re-renders.
