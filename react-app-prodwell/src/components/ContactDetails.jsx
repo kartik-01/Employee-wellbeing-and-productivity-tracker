@@ -17,8 +17,8 @@ const ContactDetails = () => (
         description="SJSU ID: 017583878"
       />
       <FeatureCard
-        title="Vyshnavi Didi"
-        description="SJSU ID: "
+        title="Vyshnavi D P"
+        description="SJSU ID: 018178979"
       />
     </div>
   </section>
