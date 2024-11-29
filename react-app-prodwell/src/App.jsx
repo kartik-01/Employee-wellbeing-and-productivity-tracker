@@ -13,8 +13,9 @@ import { LandingPage } from './pages/LandingPage';
 import { SurveyPage } from './pages/Survey';
 import { useNavigate } from "react-router-dom";
 import { DashboardPage } from './pages/Dashboard';
-
 import './styles/App.css';
+import { ProfilePage } from './pages/ProfilePage';
+import { AboutUs } from './pages/AboutUs';
 
 const Pages = () => {
     const { instance, accounts } = useMsal();
@@ -56,7 +57,7 @@ const Pages = () => {
 
                 // Redirect to the Survey page, but only if not already on it
                // Logic to be updated
-               if (event.payload.idTokenClaims.given_name && event.payload.idTokenClaims.given_name.trim() == "Vyshnavi") {
+               if (event.payload.idTokenClaims.given_name && event.payload.idTokenClaims.given_name.trim() == "Kartik Nitisn") {
                 if (location.pathname !== "/survey") {
                     navigate("/survey");
                 }
@@ -122,7 +123,9 @@ const Pages = () => {
             <Route path="/todolist" element={<TodoList />} />
             <Route path="/" element={<LandingPage />} />
             <Route path="/survey" element={<SurveyPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/aboutus" element={<AboutUs />} />
         </Routes>
     );
 };

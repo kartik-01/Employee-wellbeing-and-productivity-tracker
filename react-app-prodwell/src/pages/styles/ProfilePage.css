@@ -1,0 +1,40 @@
+.main-section {
+    background-color: #eefdf1; /* Light green background */
+    padding: 60px 0;
+    width: 100%;
+    margin: 0; /* Remove margin */
+}
+
+.main-heading {
+    font-size: 3.5rem;
+    font-weight: bold;
+}
+
+.main-subtext {
+    font-size: 1.25rem;
+    margin-bottom: 30px;
+}
+
+.cta-button {
+    border: none;
+    padding: 15px 30px;
+    border-radius: 5px;
+    background-color: #6200ea !important;
+    border-color: #6200ea !important;
+    color: white !important;
+}
+
+.features-section {
+    display: flex;
+    justify-content: space-around;
+}
+
+.feature {
+    max-width: 300px;
+    text-align: center;
+}
+
+.feature h3 {
+    font-size: 1.1rem;
+    font-weight: bold;
+}

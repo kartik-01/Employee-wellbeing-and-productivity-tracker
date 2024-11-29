@@ -11,12 +11,12 @@ export const b2cPolicies = {
         signUpSignIn: {
             authority: 'https://prodwelltest.b2clogin.com/prodwelltest.onmicrosoft.com/B2C_1_SignUpSignIn',
         },
-        // forgotPassword: {
-        //     authority: 'https://prodwelltest.b2clogin.com/prodwelltest.onmicrosoft.com/B2C_1_reset_v3',
-        // },
-        // editProfile: {
-        //     authority: 'https://prodwelltest.b2clogin.com/prodwelltest.onmicrosoft.com/b2c_1_edit_profile_v2',
-        // },
+        resetPassword: {
+            authority: 'https://prodwelltest.b2clogin.com/prodwelltest.onmicrosoft.com/B2C_1_Reset_Password',
+        },
+        editProfile: {
+            authority: 'https://prodwelltest.b2clogin.com/prodwelltest.onmicrosoft.com/B2C_1_EditProfile',
+        },
     },
     authorityDomain: 'prodwelltest.b2clogin.com'
 };
