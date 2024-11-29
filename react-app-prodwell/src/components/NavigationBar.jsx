@@ -43,8 +43,8 @@ export const NavigationBar = () => {
             <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="mr-auto">
                     <Nav.Link onClick={() => navigate('/todolist')}>Features</Nav.Link>
-                    <Nav.Link href="#about">About Us</Nav.Link>
-                    <Nav.Link href="#contact">Contact Us</Nav.Link>
+                    <Nav.Link onClick={() => navigate('/aboutus')}>About Us</Nav.Link>
+                    <Nav.Link onClick={() => navigate('/contactus')}>Contact Us</Nav.Link>
                 </Nav>
                 {activeAccount ? (
                     <Button
