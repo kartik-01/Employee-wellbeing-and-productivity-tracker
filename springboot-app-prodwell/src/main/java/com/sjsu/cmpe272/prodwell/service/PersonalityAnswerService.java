@@ -15,12 +15,35 @@ public class PersonalityAnswerService {
     @Autowired
     private PersonalityAnswerRepository repository;
 
+    // Save a new answer
     public PersonalityAnswer saveAnswer(PersonalityAnswer answer) {
         answer.setDateTime(LocalDateTime.now());
         return repository.save(answer);
     }
 
+    // Get all answers by user ID
     public List<PersonalityAnswer> getAnswersByUserId(ObjectId userId) {
         return repository.findByUserId(userId);
+    }
+
+    // Get a specific answer by its ID
+    public PersonalityAnswer getAnswerById(ObjectId id) {
+        return repository.findById(id).orElse(null);
+    }
+
+    // Update an existing answer
+    public PersonalityAnswer updateAnswer(PersonalityAnswer answer) {
+        answer.setDateTime(LocalDateTime.now()); // Update timestamp
+        return repository.save(answer);
+    }
+
+    // Delete an answer by its ID
+    public void deleteAnswer(ObjectId id) {
+        repository.deleteById(id);
+    }
+
+    // Get all answers (Optional)
+    public List<PersonalityAnswer> getAllAnswers() {
+        return repository.findAll();
     }
 }

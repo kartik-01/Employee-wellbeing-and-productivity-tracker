@@ -19,6 +19,11 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
+    // Bulk save tasks
+    public List<Task> saveTasks(List<Task> tasks) {
+        return taskRepository.saveAll(tasks);
+    }
+
     // Get all tasks assigned to a user
     public List<Task> getTasksByUserId(ObjectId userId) {
         return taskRepository.findByUserId(userId);
