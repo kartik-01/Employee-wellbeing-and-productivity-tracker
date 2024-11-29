@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-
+import './index.css';
 import { PublicClientApplication, EventType } from "@azure/msal-browser";
 import { BrowserRouter } from "react-router-dom";
 
