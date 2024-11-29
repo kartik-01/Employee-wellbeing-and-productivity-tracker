@@ -12,6 +12,8 @@ import userService from './services/userService';
 import { LandingPage } from './pages/LandingPage';
 
 import './styles/App.css';
+import { AboutUs } from './pages/AboutUs';
+import ContactUs from './pages/ContactUs'
 
 const Pages = () => {
     const { instance } = useMsal();
@@ -98,7 +100,10 @@ const Pages = () => {
     return (
         <Routes>
             <Route path="/todolist" element={<TodoList />} />
+            <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/" element={<LandingPage />} />
+            <Route path="/contactus" element={<ContactUs />} />
+
         </Routes>
     );
 };
