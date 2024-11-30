@@ -20,7 +20,7 @@ const ContactDetails = () => (
         description="SJSU ID: 017583878"
       />
       <FeatureCard
-        imageSrc="/photos/female.jpg"
+        imageSrc="/photos/vyshnavi.jpeg"
         title="Vyshnavi D P"
         description="SJSU ID: 018178979"
       />
