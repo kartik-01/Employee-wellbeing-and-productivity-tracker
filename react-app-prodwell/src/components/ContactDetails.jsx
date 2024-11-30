@@ -5,7 +5,7 @@ const ContactDetails = () => (
   <section id="features" className="w-full bg-white py-16 px-8 text-center">
     <div className="flex flex-col md:flex-row md:space-x-8 space-y-8 md:space-y-0">
       <FeatureCard
-        imageSrc="/photos/male.png"
+        imageSrc="/photos/Kenil.jpeg"
         title="Kenil Gopani"
         description="SJSU ID: 017992624"
       />
@@ -20,7 +20,7 @@ const ContactDetails = () => (
         description="SJSU ID: 017583878"
       />
       <FeatureCard
-        imageSrc="/photos/vyshnavi.jpeg"
+        imageSrc="/photos/vyshnavi.png"
         title="Vyshnavi D P"
         description="SJSU ID: 018178979"
       />
