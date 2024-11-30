@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PersonalityAnswerService {
@@ -21,25 +23,49 @@ public class PersonalityAnswerService {
         return repository.save(answer);
     }
 
-    // Get all answers by user ID
-    public List<PersonalityAnswer> getAnswersByUserId(ObjectId userId) {
-        return repository.findByUserId(userId);
+    public PersonalityAnswer saveOrUpdateAnswer(PersonalityAnswer newAnswer) {
+        // Check if the record already exists for the given userId
+        Optional<PersonalityAnswer> existingAnswerOptional = repository.findById(newAnswer.getUserId());
+
+        if (existingAnswerOptional.isPresent()) {
+            // Update existing record
+            PersonalityAnswer existingAnswer = existingAnswerOptional.get();
+            List<PersonalityAnswer.QuestionAnswer> updatedAnswers = newAnswer.getAnswers();
+
+            // Update each question-answer pair in the existing record
+            for (PersonalityAnswer.QuestionAnswer updatedQA : updatedAnswers) {
+                boolean questionExists = false;
+
+                for (PersonalityAnswer.QuestionAnswer existingQA : existingAnswer.getAnswers()) {
+                    if (existingQA.getQuestionId().equals(updatedQA.getQuestionId())) {
+                        // Update the existing question's answers
+                        existingQA.setAnswer(updatedQA.getAnswer());
+                        questionExists = true;
+                        break;
+                    }
+                }
+
+                // If the question does not exist, add it as a new entry
+                if (!questionExists) {
+                    existingAnswer.getAnswers().add(updatedQA);
+                }
+            }
+
+            existingAnswer.setDateTime(LocalDateTime.now()); // Update timestamp
+            return repository.save(existingAnswer);
+        } else {
+            // Create a new record
+            newAnswer.setDateTime(LocalDateTime.now());
+            return repository.save(newAnswer);
+        }
     }
 
-    // Get a specific answer by its ID
-    public PersonalityAnswer getAnswerById(ObjectId id) {
-        return repository.findById(id).orElse(null);
+    public Optional<PersonalityAnswer> getAnswerByUserId(String userId) {
+        return repository.findById(userId);
     }
 
-    // Update an existing answer
-    public PersonalityAnswer updateAnswer(PersonalityAnswer answer) {
-        answer.setDateTime(LocalDateTime.now()); // Update timestamp
-        return repository.save(answer);
-    }
-
-    // Delete an answer by its ID
-    public void deleteAnswer(ObjectId id) {
-        repository.deleteById(id);
+    public void deleteAnswerByUserId(String userId) {
+        repository.deleteById(userId);
     }
 
     // Get all answers (Optional)
