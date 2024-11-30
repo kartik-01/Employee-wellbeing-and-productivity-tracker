@@ -43,8 +43,8 @@ public class PersonalityQuestionService {
     public PersonalityQuestion update(UUID questionId, PersonalityQuestion updatedQuestion) {
         PersonalityQuestion existingQuestion = repository.findByQuestionId(questionId).orElseThrow(
                 () -> new IllegalArgumentException("Question with ID " + questionId + " not found"));
-        updatedQuestion.setId(existingQuestion.getId()); // Ensure the MongoDB `_id` remains the same
-        updatedQuestion.setQuestionId(existingQuestion.getQuestionId()); // Preserve the original `questionId`
+        updatedQuestion.setId(existingQuestion.getId());
+        updatedQuestion.setQuestionId(existingQuestion.getQuestionId());
         return repository.save(updatedQuestion);
     }
 
