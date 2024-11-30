@@ -1,6 +1,8 @@
 package com.sjsu.cmpe272.prodwell.controller;
 
 import java.util.List;
+import java.util.UUID;
+
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,9 +24,9 @@ public class PersonalityQuestionController {
         return service.getAll();
     }
 
-    @GetMapping("/{id}")
-    public PersonalityQuestion getById(@PathVariable ObjectId id) {
-        return service.getById(id);
+    @GetMapping("/{questionId}")
+    public PersonalityQuestion getByQuestionId(@PathVariable UUID questionId) {
+        return service.getByQuestionId(questionId);
     }
 
     @PostMapping("/")
@@ -38,15 +40,14 @@ public class PersonalityQuestionController {
         return service.addMultiple(questions);
     }
 
-    @PutMapping("/{id}")
-    public PersonalityQuestion update(@PathVariable ObjectId id, @RequestBody PersonalityQuestion question) {
-        question.setId(id);
-        return service.update(question);
+    @PutMapping("/{questionId}")
+    public PersonalityQuestion update(@PathVariable UUID questionId, @RequestBody PersonalityQuestion question) {
+        return service.update(questionId, question);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{questionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable ObjectId id) {
-        service.delete(id);
+    public void delete(@PathVariable UUID questionId) {
+        service.delete(questionId);
     }
 }
