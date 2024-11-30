@@ -2,8 +2,6 @@ package com.sjsu.cmpe272.prodwell.service;
 
 import java.util.List;
 import java.util.UUID;
-
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.sjsu.cmpe272.prodwell.entity.PersonalityQuestion;
@@ -19,14 +17,13 @@ public class PersonalityQuestionService {
         return repository.findAll();
     }
 
-    public PersonalityQuestion getByQuestionId(UUID questionId) {
+    public PersonalityQuestion getByQuestionId(String questionId) {
         return repository.findByQuestionId(questionId).orElse(null);
     }
 
-
     public PersonalityQuestion add(PersonalityQuestion question) {
         if (question.getQuestionId() == null) {
-            question.setQuestionId(UUID.randomUUID());
+            question.setQuestionId(UUID.randomUUID().toString());
         }
         return repository.save(question);
     }
@@ -34,13 +31,13 @@ public class PersonalityQuestionService {
     public List<PersonalityQuestion> addMultiple(List<PersonalityQuestion> questions) {
         questions.forEach(question -> {
             if (question.getQuestionId() == null) {
-                question.setQuestionId(UUID.randomUUID());
+                question.setQuestionId(UUID.randomUUID().toString());
             }
         });
         return repository.saveAll(questions);
     }
 
-    public PersonalityQuestion update(UUID questionId, PersonalityQuestion updatedQuestion) {
+    public PersonalityQuestion update(String questionId, PersonalityQuestion updatedQuestion) {
         PersonalityQuestion existingQuestion = repository.findByQuestionId(questionId).orElseThrow(
                 () -> new IllegalArgumentException("Question with ID " + questionId + " not found"));
         updatedQuestion.setId(existingQuestion.getId());
@@ -48,7 +45,7 @@ public class PersonalityQuestionService {
         return repository.save(updatedQuestion);
     }
 
-    public void delete(UUID questionId) {
+    public void delete(String questionId) {
         repository.deleteByQuestionId(questionId);
     }
 }

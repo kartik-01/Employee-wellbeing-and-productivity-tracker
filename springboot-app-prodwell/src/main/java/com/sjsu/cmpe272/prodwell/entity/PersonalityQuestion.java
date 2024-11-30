@@ -7,7 +7,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
 
 import java.util.List;
-import java.util.UUID;
 
 @Document(collection = "personalityQuestions")
 @Data
@@ -15,7 +14,8 @@ public class PersonalityQuestion {
     @Id
     @JsonIgnore
     private ObjectId id;
-    private UUID questionId;
+
+    private String questionId; // Changed from UUID to String
     private String question;
     private String type;
     private List<String> options;
