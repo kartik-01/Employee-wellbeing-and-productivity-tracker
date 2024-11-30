@@ -9,4 +9,6 @@ import com.sjsu.cmpe272.prodwell.entity.User;
 public interface UserRepository extends MongoRepository<User,String>{
 
 	 Optional<User> findByOid(String oid);
+
+	boolean existsByOid(String oid);
 }
