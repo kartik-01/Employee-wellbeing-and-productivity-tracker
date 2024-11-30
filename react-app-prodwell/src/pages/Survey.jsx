@@ -4,9 +4,9 @@ import { FaArrowRight, FaArrowLeft } from 'react-icons/fa';
 import { MsalAuthenticationTemplate } from '@azure/msal-react';
 import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-export const SurveyPage = () => {
+export const SurveyPage = ({ userId, setUserId }) => {
   const authRequest = {
     ...loginRequest,
   };
@@ -15,67 +15,36 @@ export const SurveyPage = () => {
       interactionType={InteractionType.Redirect} 
       authenticationRequest={authRequest}
     >
-      <SurveyPageContent />
+      <SurveyPageContent userId={userId} setUserId={setUserId} />
     </MsalAuthenticationTemplate>
   );
 };
 
-const SurveyPageContent = () => {
+const SurveyPageContent = ({ userId, setUserId }) => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const navigate = useNavigate();
+  const location = useLocation();
+
   useEffect(() => {
-    // Fetch questions from the backend
     const fetchQuestions = async () => {
-      // Hardcoded response for personality questions only
-      const response = {
-        data: [
-          {
-            "questionId": 1,
-            "category": "Personality",
-            "question": "Do you consider yourself more introverted or extroverted in a work environment?",
-            "type": "select",
-            "options": ["Introverted", "Extroverted", "A mix of both"]
-          },
-          {
-            "questionId": 2,
-            "category": "Personality",
-            "question": "What activities do you enjoy outside of work?",
-            "type": "multiSelect",
-            "options": ["Physical exercise (e.g., running, gym)", "Creative arts (e.g., painting, writing)", "Socializing with friends or family", "Learning new things (e.g., courses, reading)", "Other (Please specify)"]
-          },
-          {
-            "questionId": 3,
-            "category": "Personality",
-            "question": "How often do you engage in activities that help you recharge (e.g., hobbies, exercise, meditation)?",
-            "type": "select",
-            "options": ["Daily", "Weekly", "Monthly", "Rarely"]
-          },
-          {
-            "questionId": 4,
-            "category": "Personality",
-            "question": "What time of day do you feel most productive?",
-            "type": "select",
-            "options": ["Morning", "Afternoon", "Evening", "Late Night"]
-          },
-          {
-            "questionId": 5,
-            "category": "Personality",
-            "question": "When facing a difficult task, what strategies help you the most?",
-            "type": "select",
-            "options": ["Breaking it into smaller parts", "Seeking advice or feedback", "Researching possible solutions", "Taking a step back before tackling it again"]
-          },
-          {
-            "questionId": 6,
-            "category": "Personality",
-            "question": "On a scale of 1 to 10, how well do you feel you balance multiple responsibilities at once?",
-            "type": "range",
-            "options": {}
-          }
-        ]
-      };
-      setQuestions(response.data);
+      try {
+        const response = await axios.get('http://localhost:8080/personalityQuestions/');
+        const validQuestions = response.data.filter(
+          (item) => item.question && item.type && item.options
+        );
+        const formattedQuestions = validQuestions.map((item) => ({
+          questionId: item.id.timestamp,
+          category: "Personality",
+          question: item.question,
+          type: item.type,
+          options: item.options,
+        }));
+        setQuestions(formattedQuestions);
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      }
     };
 
     fetchQuestions();
@@ -93,7 +62,6 @@ const SurveyPageContent = () => {
     const isSelected = currentAnswers.includes(answer);
 
     if (isSelected) {
-      // Remove answer if it's already selected
       setSelectedAnswers({
         ...selectedAnswers,
         [questionId]: currentAnswers.filter((item) => item !== answer),
@@ -117,7 +85,6 @@ const SurveyPageContent = () => {
     if (isAnswerValid(currentQuestionIndex)) {
       const currentQuestion = questions[currentQuestionIndex];
 
-      // If "Other" is selected and has text, replace "Other (Please specify)" with the actual text
       if (currentQuestion.type === 'multiSelect' && selectedAnswers[`other-${currentQuestion.questionId}`]) {
         const updatedAnswers = selectedAnswers[currentQuestion.questionId].map((item) =>
           item === 'Other (Please specify)'
@@ -134,13 +101,13 @@ const SurveyPageContent = () => {
       }
 
       const answerPayload = {
-        userId: "", // Replace with actual user ID if available
+        userId: userId, // Replace with actual user ID if available
         questionId: currentQuestion.questionId,
         answer: selectedAnswers[currentQuestion.questionId],
       };
 
       try {
-        // await axios.post('/api/saveAnswer', answerPayload);
+        await axios.post('http://localhost:8080/personalityAnswers/', answerPayload);
       } catch (error) {
         console.error('Error saving answer:', error);
       }
@@ -161,8 +128,6 @@ const SurveyPageContent = () => {
     console.log("Survey submitted, navigating to dashboard...");
     console.log("Selected Answers:", selectedAnswers);
     navigate('/dashboard');
-    // Implement navigation to dashboard, e.g., using React Router's `useNavigate`
-    // navigate('/dashboard');
   };
 
   const isAnswerValid = (index) => {
