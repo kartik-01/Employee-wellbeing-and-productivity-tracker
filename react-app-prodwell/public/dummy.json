@@ -1,0 +1,159 @@
+[
+    {
+      "questionId": 1,
+      "category": "Personality",
+      "question": "Do you consider yourself more introverted or extroverted in a work environment?",
+      "type": "select",
+      "options": ["Introverted", "Extroverted", "A mix of both"]
+    },
+    {
+      "questionId": 2,
+      "category": "Personality",
+      "question": "What activities do you enjoy outside of work?",
+      "type": "multiSelect",
+      "options": ["Physical exercise (e.g., running, gym)", "Creative arts (e.g., painting, writing)", "Socializing with friends or family", "Learning new things (e.g., courses, reading)", "Other (Please specify)"]
+    },
+    {
+      "questionId": 3,
+      "category": "Personality",
+      "question": "How often do you engage in activities that help you recharge (e.g., hobbies, exercise, meditation)?",
+      "type": "select",
+      "options": ["Daily", "Weekly", "Monthly", "Rarely"]
+    },
+    {
+      "questionId": 4,
+      "category": "Personality",
+      "question": "What time of day do you feel most productive?",
+      "type": "select",
+      "options": ["Morning", "Afternoon", "Evening", "Late Night"]
+    },
+    {
+      "questionId": 5,
+      "category": "Personality",
+      "question": "When facing a difficult task, what strategies help you the most?",
+      "type": "select",
+      "options": ["Breaking it into smaller parts", "Seeking advice or feedback", "Researching possible solutions", "Taking a step back before tackling it again"]
+    },
+    {
+      "questionId": 6,
+      "category": "Personality",
+      "question": "On a scale of 1 to 10, how well do you feel you balance multiple responsibilities at once?",
+      "type": "range",
+      "options": {}
+    },
+    {
+      "questionId": 7,
+      "category": "Personality",
+      "question": "Do you enjoy working under deadlines?",
+      "type": "select",
+      "options": ["Yes, it helps me stay focused.", "Sometimes, depending on the task.", "No, I prefer flexible timelines."]
+    },
+    {
+      "questionId": 8,
+      "category": "Personality",
+      "question": "Which of these values are important to you in the workplace?",
+      "type": "multiSelect",
+      "options": ["Integrity and honesty", "Respect for others", "Creativity and innovation", "Accountability", "Continuous learning and growth"]
+    },
+    {
+      "questionId": 9,
+      "category": "Personality",
+      "question": "What motivates you the most at work?",
+      "type": "multiSelect",
+      "options": ["Achieving goals", "Recognition and rewards", "Learning and growth opportunities", "Helping others", "Being part of a team"]
+    },
+    {
+      "questionId": 10,
+      "category": "Personality",
+      "question": "Do you prefer working on a single task at a time or multitasking?",
+      "type": "select",
+      "options": ["Single task", "Multitasking", "No preference"]
+    },
+    {
+      "questionId": 11,
+      "category": "Productivity",
+      "question": "How do you make decisions at work?",
+      "type": "select",
+      "options": ["Based on careful analysis", "Based on intuition and experience", "A combination of both"]
+    },
+    {
+      "questionId": 12,
+      "category": "Productivity",
+      "question": "Do you enjoy working under deadlines?",
+      "type": "select",
+      "options": ["Yes, it helps me stay focused.", "Sometimes, depending on the task.", "No, I prefer flexible timelines."]
+    },
+    {
+      "questionId": 13,
+      "category": "Productivity",
+      "question": "How comfortable are you discussing your stress levels with your manager or team?",
+      "type": "select",
+      "options": ["Very comfortable", "Somewhat comfortable", "Neutral", "Not comfortable"]
+    },
+    {
+      "questionId": 14,
+      "category": "Productivity",
+      "question": "On a scale of 1 to 10, how manageable do you find your current workload?",
+      "type": "range",
+      "options": {}
+    },
+   {
+    "questionId": 15,
+    "category": "Productivity",
+    "question": "How often do you need to work overtime to complete your tasks? (Rate from 1 - Never to 10 - Very Often)",
+    "type": "range",
+    "options": {}
+  },
+  
+  
+    {
+      "questionId": 16,
+      "category": "Productivity",
+      "question": "How often do you feel distracted during work hours?",
+      "type": "select",
+      "options": ["Never", "Rarely", "Occasionally", "Often", "Always"]
+    },
+    {
+      "questionId": 17,
+      "category": "Productivity",
+      "question": "What tools or techniques help you stay organized?",
+      "type": "select",
+      "options": ["Task management software", "To-do lists", "Calendar reminders", "Time-blocking", "Other (Please specify)"]
+    },
+    {
+      "questionId": 18,
+      "category": "Productivity",
+      "question": "Do you feel that your work is affecting your mental well-being?",
+      "type": "select",
+      "options": ["Not at all", "Occasionally", "Often", "Always"]
+    },
+    {
+      "questionId": 19,
+      "category": "Productivity",
+      "question": "What contributes most to your work-related stress?",
+      "type": "multiSelect",
+      "options": ["Heavy workload", "Lack of resources or tools", "Tight deadlines", "Poor work-life balance", "Lack of support from management", "Other (Please specify)"]
+    },
+    {
+      "questionId": 20,
+      "category": "Productivity",
+      "question": "Do you enjoy working collaboratively with your team, or do you prefer independent work?",
+      "type": "select",
+      "options": ["Collaboration", "Independent work", "A mix of both"]
+    },
+    {
+      "questionId": 21,
+      "category": "Productivity",
+      "question": "What two factors are important for you to maintain focus during work?",
+      "type": "multiSelect",
+      "options": ["Quiet environment", "Regular breaks", "Well-defined tasks", "Support from colleagues", "Clear goals", "Other (Please specify)"]
+    },
+    {
+      "questionId": 22,
+      "category": "Productivity",
+      "question": "What aspects of your job do you enjoy the most?",
+      "type": "multiSelect",
+      "options": ["Solving complex problems", "Engaging with customers or stakeholders", "Designing or creating new things", "Supporting teammates", "Learning new technologies or methodologies"]
+    }
+  ]
+  

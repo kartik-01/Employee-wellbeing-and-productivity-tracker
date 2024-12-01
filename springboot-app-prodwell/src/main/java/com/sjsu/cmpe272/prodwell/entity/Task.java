@@ -32,6 +32,7 @@ public class Task {
     public void generateTaskId() {
         if (this.taskId == null) {
             this.taskId = UUID.randomUUID().toString();
+            this.taskId = UUID.randomUUID().toString();
         }
     }
 }
