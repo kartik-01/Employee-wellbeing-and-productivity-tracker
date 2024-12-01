@@ -4,9 +4,23 @@ import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
 import { FaPlus, FaTrash, FaMagic, FaEdit } from 'react-icons/fa';
 import { Bar, Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { Line } from 'react-chartjs-2';
+// import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, LineElement, PointElement } from 'chart.js';
 
-ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement);
+// ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement);
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement, // For Pie chart
+  LineElement, // For Line chart
+  PointElement // For Line chart
+);
 
 export const DashboardPage = ({ userId, setUserId }) => {
   const authRequest = {
@@ -14,8 +28,8 @@ export const DashboardPage = ({ userId, setUserId }) => {
   };
 
   return (
-    <MsalAuthenticationTemplate 
-      interactionType={InteractionType.Redirect} 
+    <MsalAuthenticationTemplate
+      interactionType={InteractionType.Redirect}
       authenticationRequest={authRequest}
     >
       <DashboardPageContent userId={userId} setUserId={setUserId} />
@@ -33,6 +47,7 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
   const [totalHours, setTotalHours] = useState("");
   const [errors, setErrors] = useState({});
   const [showGraphs, setShowGraphs] = useState(false);
+  const [showStress, setShowStress] = useState(false);
   const [taskStatusCounts, setTaskStatusCounts] = useState({ beforeTime: 0, onTime: 0, late: 0 });
   const [editMode, setEditMode] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
@@ -119,7 +134,7 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
     try {
       const url = editMode ? `http://localhost:8080/tasks/${selectedTaskId}` : "http://localhost:8080/tasks/";
       const method = editMode ? "PUT" : "POST";
-      
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -154,6 +169,10 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
   const handleMagicClick = () => {
     setShowGraphs(true);
   };
+
+  const handleStressClick = () => {
+    setShowStress(true);
+  }
 
   const handleEditTask = (task) => {
     setTaskName(task.taskName);
@@ -255,6 +274,59 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
     },
   };
 
+  // Line chart data
+  const taskData = {
+    startDate: new Date(2024, 10, 21), // November 21, 2024
+    endDate: new Date(2024, 10, 23), // November 23, 2024
+    stressLevels: [7, 10, 9],
+  };
+
+  // Helper function to calculate all dates between startDate and endDate
+  const calculateDateRange = (startDate, endDate) => {
+    const dates = [];
+    let currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return dates.map((date) =>
+      date.toISOString().split("T")[0] // Format date as YYYY-MM-DD
+    );
+  };
+
+  // Extract dates for the X-axis
+  const xAxisLabels = calculateDateRange(taskData.startDate, taskData.endDate);
+
+  // Create data object for the line chart
+  const lineData = {
+    labels: xAxisLabels,
+    datasets: [
+      {
+        label: "Stress Levels",
+        data: taskData.stressLevels,
+        fill: false,
+        borderColor: "#4CAF50",
+        tension: 0.1,
+      },
+    ],
+  };
+
+  // Line chart options
+  const lineOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: true,
+        text: "Stress Levels Over Time",
+      },
+    },
+  };
+
   return (
     <div className="flex flex-row items-start justify-center min-h-screen p-4 bg-gray-100 gap-4">
       {/* Left side card for form and task table */}
@@ -329,12 +401,12 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
             </button>
           </div>
         </div>
-          <div className="mt-8" >
-            <h2 className="text-xl font-semibold mb-4">Tasks Overview</h2>
-        {tasks.length > 0 && (
+        <div className="mt-8" >
+          <h2 className="text-xl font-semibold mb-4">Tasks Overview</h2>
+          {tasks.length > 0 && (
             <div className="">
-              <table 
-              style={{
+              <table
+                style={{
                   maxHeight: '12rem',
                   width: '100%',
                   overflowY: 'auto',
@@ -342,7 +414,7 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
                 className="bg-white border rounded">
                 <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 1 }}>
                   <tr className="flex m-2">
-                  <th
+                    <th
                       className="px-4 py-2"
                       style={{
                         display: 'table',
@@ -382,20 +454,20 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
                 </thead>
                 <tbody
                   style={{
-                    maxHeight: '12rem',
+                    maxHeight: '10rem',
                     overflowY: 'auto',
                     display: 'block',
                   }}
                 >
                   {tasks.map((task, index) => (
-                    <tr 
-                    key={index} 
-                    className={`text-center ${calculateStatus(task.taskEndDate, task.deadlineDate) === 0 ? 'bg-green-100' : calculateStatus(task.taskEndDate, task.deadlineDate) === 1 ? 'bg-yellow-100' : 'bg-red-100'}`}
-                    style={{
-                      display: 'table',
-                      width: '100%',
-                      tableLayout: 'fixed',
-                    }}
+                    <tr
+                      key={index}
+                      className={`text-center ${calculateStatus(task.taskEndDate, task.deadlineDate) === 0 ? 'bg-green-100' : calculateStatus(task.taskEndDate, task.deadlineDate) === 1 ? 'bg-yellow-100' : 'bg-red-100'}`}
+                      style={{
+                        display: 'table',
+                        width: '100%',
+                        tableLayout: 'fixed',
+                      }}
                     >
                       <td className="px-4 py-2 border">{task.taskName}</td>
                       <td className="px-4 py-2 border">
@@ -420,21 +492,37 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
                 </tbody>
               </table>
             </div>
-        )}
+          )}
         </div>
 
 
       </div>
       {showGraphs && (
-        <div ref={rightCardRef} className="w-2/4 p-8 bg-white rounded-lg shadow-md flex flex-col overflow-auto" style={{ minHeight: '500px' }}>
-          <h2 className="text-2xl font-semibold mb-6 text-center">Task Completion Status</h2>
-          <Bar data={data} options={options} />
+        <div ref={rightCardRef} className="w-2/4 p-8 bg-white rounded-lg shadow-md flex flex-col" style={{ minHeight: '500px' }}>
+          {/* <h2 className="text-2xl font-semibold mb-6 text-center">Task Completion Status</h2>
+          <Bar data={data} options={options} /> */}
           <div className="mt-8" style={{ height: '400px' }}>
             <h2 className="text-2xl font-semibold mb-6 text-center">Task Completion Percentage</h2>
             <Pie data={pieData} options={pieOptions} />
           </div>
+          <center>
+          <button
+            onClick={handleStressClick}
+            className="flex items-center gap-1 px-2 py-2 w-32 bg-purple-500 text-white rounded hover:bg-purple-600 transition-all mt-20"
+          >
+            <FaMagic /> Show Stress
+          </button>
+          </center> 
+          {showStress && (
+            <div className="mt-2" style={{ height: '400px' }}>
+            {/* <h2 className="text-xl font-semibold mb-2 text-center">Stress Analysis</h2> */}
+            <center><Line data={lineData} options={lineOptions} height={200}/></center>
+          </div>
+          )}
+
         </div>
       )}
+
     </div>
   );
 };
