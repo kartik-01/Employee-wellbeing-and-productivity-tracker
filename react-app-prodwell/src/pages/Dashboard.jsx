@@ -325,6 +325,12 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
         text: "Stress Levels Over Time",
       },
     },
+      scales: {
+        y: {
+          beginAtZero: true,
+          min: 0,            
+        },
+      },
   };
 
   return (
