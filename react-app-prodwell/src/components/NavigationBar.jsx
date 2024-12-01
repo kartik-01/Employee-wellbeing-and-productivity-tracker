@@ -4,7 +4,7 @@ import { useMsal } from '@azure/msal-react';
 import { loginRequest, b2cPolicies } from '../authConfig';
 import { useNavigate } from 'react-router-dom';
 import './styles/NavigationBar.css';
-import logo from '../logo.svg';
+import logo from '../assets/images/prodwell.png'; // Adjust the path based on your actual file location
 import { EventType } from '@azure/msal-browser';
 
 export const NavigationBar = () => {
@@ -66,22 +66,23 @@ export const NavigationBar = () => {
 
     return (
 <Navbar bg="light" expand="lg" className="px-3 custom-navbar">
-    <Navbar.Brand href="/" className="mr-auto font-weight-bold">
-        <img
-            src={logo}
-            width="30"
-            height="30"
-            className="d-inline-block align-top"
-            alt="ProdWell logo"
-        />
-        <span className="ml-2">ProdWell</span>
-    </Navbar.Brand>
+<Navbar.Brand href="/" className="mr-auto font-weight-bold">
+    <img
+        src={logo}
+        width="30"
+        height="30"
+        className="d-inline-block align-top"
+        alt="ProdWell logo"
+        style={{ borderRadius: "50%" }} 
+    />
+    <span className="ml-2">ProdWell</span>
+</Navbar.Brand>
     <Navbar.Toggle aria-controls="basic-navbar-nav" />
     <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="me-auto">
             <Nav.Link onClick={() => navigate('/dashboard')}>Dashboard</Nav.Link>
             <Nav.Link href="/aboutus">About Us</Nav.Link>
-            <Nav.Link onClick={()=>navigate('/survey')}   href="#survey">Survey</Nav.Link>
+            <Nav.Link onClick={()=>navigate('/survey')}>Survey</Nav.Link>
         </Nav>
         {userName ? (
             <Dropdown align="end">

@@ -6,104 +6,89 @@ import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
 import { useNavigate } from 'react-router-dom';
 
-export const SurveyPage = () => {
+export const SurveyPage = ({ userId, setUserId }) => {
   const authRequest = {
     ...loginRequest,
   };
   return (
-    <MsalAuthenticationTemplate 
-      interactionType={InteractionType.Redirect} 
+    <MsalAuthenticationTemplate
+      interactionType={InteractionType.Redirect}
       authenticationRequest={authRequest}
     >
-      <SurveyPageContent />
+      <SurveyPageContent userId={userId} setUserId={setUserId} />
     </MsalAuthenticationTemplate>
   );
 };
 
-const SurveyPageContent = () => {
+const SurveyPageContent = ({ userId, setUserId }) => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [isNextDisabled, setIsNextDisabled] = useState(true);
+  const [otherTextError, setOtherTextError] = useState('');
   const navigate = useNavigate();
+
   useEffect(() => {
-    // Fetch questions from the backend
     const fetchQuestions = async () => {
-      // Hardcoded response for personality questions only
-      const response = {
-        data: [
-          {
-            "questionId": 1,
-            "category": "Personality",
-            "question": "Do you consider yourself more introverted or extroverted in a work environment?",
-            "type": "select",
-            "options": ["Introverted", "Extroverted", "A mix of both"]
-          },
-          {
-            "questionId": 2,
-            "category": "Personality",
-            "question": "What activities do you enjoy outside of work?",
-            "type": "multiSelect",
-            "options": ["Physical exercise (e.g., running, gym)", "Creative arts (e.g., painting, writing)", "Socializing with friends or family", "Learning new things (e.g., courses, reading)", "Other (Please specify)"]
-          },
-          {
-            "questionId": 3,
-            "category": "Personality",
-            "question": "How often do you engage in activities that help you recharge (e.g., hobbies, exercise, meditation)?",
-            "type": "select",
-            "options": ["Daily", "Weekly", "Monthly", "Rarely"]
-          },
-          {
-            "questionId": 4,
-            "category": "Personality",
-            "question": "What time of day do you feel most productive?",
-            "type": "select",
-            "options": ["Morning", "Afternoon", "Evening", "Late Night"]
-          },
-          {
-            "questionId": 5,
-            "category": "Personality",
-            "question": "When facing a difficult task, what strategies help you the most?",
-            "type": "select",
-            "options": ["Breaking it into smaller parts", "Seeking advice or feedback", "Researching possible solutions", "Taking a step back before tackling it again"]
-          },
-          {
-            "questionId": 6,
-            "category": "Personality",
-            "question": "On a scale of 1 to 10, how well do you feel you balance multiple responsibilities at once?",
-            "type": "range",
-            "options": {}
-          }
-        ]
-      };
-      setQuestions(response.data);
+      try {
+        const response = await axios.get('http://localhost:8080/personalityQuestions/');
+        const validQuestions = response.data.filter(
+          (item) => item.question && item.type && item.options
+        );
+        const formattedQuestions = validQuestions.map((item) => ({
+          questionId: item.questionId,
+          category: "Personality",
+          question: item.question,
+          type: item.type,
+          options: item.options,
+        }));
+        setQuestions(formattedQuestions);
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      }
     };
 
     fetchQuestions();
   }, []);
+
+  useEffect(() => {
+    const currentQuestion = questions[currentQuestionIndex];
+    if (currentQuestion) {
+      validateAnswer(currentQuestion.questionId, selectedAnswers[currentQuestion.questionId] || []);
+    }
+  }, [currentQuestionIndex, questions]);
 
   const handleAnswerChange = (questionId, answer) => {
     setSelectedAnswers({
       ...selectedAnswers,
       [questionId]: answer,
     });
+
+    if (answer === 'Other (Please specify)') {
+      validateOtherText(questionId, selectedAnswers[`other-${questionId}`] || '');
+    } else {
+      setOtherTextError('');
+      setIsNextDisabled(false); // Enable "Next" button if valid answer is selected
+    }
   };
 
   const handleCheckboxChange = (questionId, answer) => {
     const currentAnswers = selectedAnswers[questionId] || [];
     const isSelected = currentAnswers.includes(answer);
 
+    let updatedAnswers;
     if (isSelected) {
-      // Remove answer if it's already selected
-      setSelectedAnswers({
-        ...selectedAnswers,
-        [questionId]: currentAnswers.filter((item) => item !== answer),
-      });
+      updatedAnswers = currentAnswers.filter((item) => item !== answer);
     } else {
-      setSelectedAnswers({
-        ...selectedAnswers,
-        [questionId]: [...currentAnswers, answer],
-      });
+      updatedAnswers = [...currentAnswers, answer];
     }
+
+    setSelectedAnswers({
+      ...selectedAnswers,
+      [questionId]: updatedAnswers,
+    });
+
+    validateAnswer(questionId, updatedAnswers);
   };
 
   const handleOtherTextChange = (questionId, value) => {
@@ -111,13 +96,51 @@ const SurveyPageContent = () => {
       ...selectedAnswers,
       [`other-${questionId}`]: value,
     });
+
+    validateOtherText(questionId, value);
   };
 
-  const handleNext = async () => {
+  const validateOtherText = (questionId, value) => {
+    const validChars = /^[A-Za-z\s]*$/;
+
+    if (!validChars.test(value)) {
+      setOtherTextError("Only letters are allowed.");
+      setIsNextDisabled(true);
+    } else if (value.length < 2 || value.length > 30) {
+      setOtherTextError("Must be between 2-30 characters.");
+      setIsNextDisabled(true);
+    } else {
+      setOtherTextError('');
+      validateAnswer(questionId, selectedAnswers[questionId] || []);
+    }
+  };
+
+  const validateAnswer = (questionId, answer) => {
+    if (Array.isArray(answer)) {
+      if (answer.includes('Other (Please specify)')) {
+        const otherText = selectedAnswers[`other-${questionId}`];
+        if (!otherText || otherText.length < 2 || otherText.length > 30 || !/^[A-Za-z\s]*$/.test(otherText)) {
+          setIsNextDisabled(true);
+          return;
+        }
+      }
+      setIsNextDisabled(answer.length === 0);
+    } else {
+      if (answer === 'Other (Please specify)') {
+        const otherText = selectedAnswers[`other-${questionId}`];
+        if (!otherText || otherText.length < 2 || otherText.length > 30 || !/^[A-Za-z\s]*$/.test(otherText)) {
+          setIsNextDisabled(true);
+          return;
+        }
+      }
+      setIsNextDisabled(!answer);
+    }
+  };
+
+  const handleNext = () => {
     if (isAnswerValid(currentQuestionIndex)) {
       const currentQuestion = questions[currentQuestionIndex];
 
-      // If "Other" is selected and has text, replace "Other (Please specify)" with the actual text
       if (currentQuestion.type === 'multiSelect' && selectedAnswers[`other-${currentQuestion.questionId}`]) {
         const updatedAnswers = selectedAnswers[currentQuestion.questionId].map((item) =>
           item === 'Other (Please specify)'
@@ -133,20 +156,9 @@ const SurveyPageContent = () => {
         });
       }
 
-      const answerPayload = {
-        userId: "", // Replace with actual user ID if available
-        questionId: currentQuestion.questionId,
-        answer: selectedAnswers[currentQuestion.questionId],
-      };
-
-      try {
-        // await axios.post('/api/saveAnswer', answerPayload);
-      } catch (error) {
-        console.error('Error saving answer:', error);
-      }
-
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
+        setIsNextDisabled(true);
       }
     }
   };
@@ -157,13 +169,36 @@ const SurveyPageContent = () => {
     }
   };
 
-  const handleSubmit = () => {
-    console.log("Survey submitted, navigating to dashboard...");
-    console.log("Selected Answers:", selectedAnswers);
-    navigate('/dashboard');
-    // Implement navigation to dashboard, e.g., using React Router's `useNavigate`
-    // navigate('/dashboard');
+  const handleSubmit = async () => {
+    // Prepare the payload by processing the selectedAnswers object.
+    const processedAnswers = Object.entries(selectedAnswers).reduce((acc, [key, value]) => {
+      // Check if the key contains the "other-" prefix and map it back to the original question ID.
+      if (key.startsWith('other-')) {
+        const originalQuestionId = key.replace('other-', '');
+        acc[originalQuestionId] = value;
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+  
+    const payload = {
+      userId: userId,
+      answers: Object.entries(processedAnswers).map(([questionId, answer]) => ({
+        questionId,
+        answer: Array.isArray(answer) ? answer : [answer],
+      })),
+    };
+  
+    try {
+      await axios.post('http://localhost:8080/personalityAnswers/', payload);
+      console.log("Survey submitted successfully.");
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error submitting survey:', error);
+    }
   };
+  
 
   const isAnswerValid = (index) => {
     const question = questions[index];
@@ -202,6 +237,19 @@ const SurveyPageContent = () => {
                     className="mr-2"
                   />
                   {option}
+                  {option === 'Other (Please specify)' && selectedAnswers[currentQuestion.questionId] === 'Other (Please specify)' && (
+                    <div className="flex flex-col w-full ml-2 mt-1">
+                      <input
+                        type="text"
+                        placeholder="Please specify"
+                        value={selectedAnswers[`other-${currentQuestion.questionId}`] || ''}
+                        onChange={(e) => handleOtherTextChange(currentQuestion.questionId, e.target.value)}
+                        className="p-1 border rounded w-full"
+                        required
+                      />
+                      {otherTextError && <p className="text-red-500 text-sm mt-1">{otherTextError}</p>}
+                    </div>
+                  )}
                 </label>
               ))}
             </div>
@@ -220,14 +268,17 @@ const SurveyPageContent = () => {
                   />
                   {option}
                   {option === 'Other (Please specify)' && selectedAnswers[currentQuestion.questionId]?.includes(option) && (
-                    <input
-                      type="text"
-                      placeholder="Please specify"
-                      value={selectedAnswers[`other-${currentQuestion.questionId}`] || ''}
-                      onChange={(e) => handleOtherTextChange(currentQuestion.questionId, e.target.value)}
-                      className="ml-2 p-1 border rounded w-full"
-                      required
-                    />
+                    <div className="flex flex-col w-full ml-2 mt-1">
+                      <input
+                        type="text"
+                        placeholder="Please specify"
+                        value={selectedAnswers[`other-${currentQuestion.questionId}`] || ''}
+                        onChange={(e) => handleOtherTextChange(currentQuestion.questionId, e.target.value)}
+                        className="p-1 border rounded w-full"
+                        required
+                      />
+                      {otherTextError && <p className="text-red-500 text-sm mt-1">{otherTextError}</p>}
+                    </div>
                   )}
                 </label>
               ))}
@@ -258,7 +309,7 @@ const SurveyPageContent = () => {
           {currentQuestionIndex < questions.length - 1 ? (
             <button
               onClick={handleNext}
-              disabled={!isAnswerValid(currentQuestionIndex)}
+              disabled={isNextDisabled || !isAnswerValid(currentQuestionIndex)}
               className="px-6 py-3 text-white bg-[#6200ea] rounded-lg hover:bg-[#4a00b4] disabled:opacity-50"
             >
               <FaArrowRight />
@@ -266,7 +317,7 @@ const SurveyPageContent = () => {
           ) : (
             <button
               onClick={handleSubmit}
-              disabled={!isAnswerValid(currentQuestionIndex)}
+              disabled={isNextDisabled || !isAnswerValid(currentQuestionIndex)}
               className="px-6 py-3 text-white bg-[#6200ea] rounded-lg hover:bg-[#4a00b4] disabled:opacity-50"
             >
               Submit
