@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -34,9 +33,9 @@ public class TaskController {
     }
 
     // Endpoint to get all tasks assigned to a specific user
-    @GetMapping("/user/{oid}")
-    public List<Task> getTasksByUserOid(@PathVariable String oid) {
-        return taskService.getTasksByUserOid(oid);
+    @GetMapping("/user/{userOid}")
+    public List<Task> getTasksByUserOid(@PathVariable String userOid) {
+        return taskService.getTasksByUserOid(userOid);
     }
 
     // Endpoint to get a task by its ID
