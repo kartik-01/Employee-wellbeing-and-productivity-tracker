@@ -1,14 +1,31 @@
+Dashboard.jsx
+
 import React, { useState, useEffect, useRef } from 'react';
 import { MsalAuthenticationTemplate } from '@azure/msal-react';
 import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
-import { FaPlus, FaTrash, FaMagic, FaEdit } from 'react-icons/fa';
+import { FaPlus, FaTrash } from 'react-icons/fa';
 import { Bar, Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { Line } from 'react-chartjs-2';
+// import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, LineElement, PointElement } from 'chart.js';
 
-ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement);
+// Registering necessary elements
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement, // For Pie chart
+  LineElement, // For Line chart
+  PointElement // For Line chart
+);
 
-export const DashboardPage = ({ userId, setUserId }) => {
+// ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement);
+
+export const DashboardPage = () => {
   const authRequest = {
     ...loginRequest,
   };
@@ -18,12 +35,12 @@ export const DashboardPage = ({ userId, setUserId }) => {
       interactionType={InteractionType.Redirect} 
       authenticationRequest={authRequest}
     >
-      <DashboardPageContent userId={userId} setUserId={setUserId} />
+      <DashboardPageContent />
     </MsalAuthenticationTemplate>
   );
 };
 
-export const DashboardPageContent = ({ userId, setUserId }) => {
+export const DashboardPageContent = () => {
   const [tasks, setTasks] = useState([]);
   const [taskName, setTaskName] = useState("");
   const [assignedDate, setAssignedDate] = useState("");
@@ -32,18 +49,8 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
   const [taskEndDate, setTaskEndDate] = useState("");
   const [totalHours, setTotalHours] = useState("");
   const [errors, setErrors] = useState({});
-  const [showGraphs, setShowGraphs] = useState(false);
-  const [taskStatusCounts, setTaskStatusCounts] = useState({ beforeTime: 0, onTime: 0, late: 0 });
-  const [editMode, setEditMode] = useState(false);
-  const [selectedTaskId, setSelectedTaskId] = useState(null);
   const leftCardRef = useRef(null);
   const rightCardRef = useRef(null);
-
-  useEffect(() => {
-    if (userId) {
-      fetchTasks();
-    }
-  }, [userId]);
 
   useEffect(() => {
     if (leftCardRef.current && rightCardRef.current) {
@@ -55,34 +62,11 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
     }
   }, [tasks]);
 
-  const fetchTasks = async () => {
-    if (!userId) {
-      console.error("User ID is not available. Please ensure you are logged in.");
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:8080/tasks/user/${userId}`);
-      if (!response.ok) {
-        console.error("Failed to fetch tasks:", response.statusText);
-        return;
-      }
-      const data = await response.json();
-      setTasks(data);
-      updateTaskStatusCounts(data);
-    } catch (error) {
-      console.error("Network error while fetching tasks:", error);
-    }
-  };
-
-  const handleAddOrUpdateTask = async () => {
+  const handleAddTask = () => {
     const validationErrors = {};
 
-    const taskNamePattern = /^[a-zA-Z\s\-]+$/;
-    if (!taskName.trim()) {
+    if (taskName.trim() === "") {
       validationErrors.taskName = "Task name is required.";
-    } else if (!taskNamePattern.test(taskName)) {
-      validationErrors.taskName = "Task name can only contain letters, hyphens, and spaces.";
     }
 
     if (assignedDate && taskStartDate && new Date(taskStartDate) < new Date(assignedDate)) {
@@ -97,73 +81,32 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       validationErrors.taskEndDate = "Task end date cannot be before the start date.";
     }
 
-    if (totalHours && (isNaN(totalHours) || totalHours <= 0 || totalHours >= 45)) {
-      validationErrors.totalHours = "Total number of hours must be a number greater than 0 and less than 45.";
-    }
-
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
-    const taskPayload = {
+    const newTask = {
       taskName,
       assignedDate,
       deadlineDate,
       taskStartDate,
       taskEndDate,
-      totalNoHours: parseInt(totalHours, 10),
-      userId,
+      totalHours,
+      status: calculateStatus(taskEndDate, deadlineDate),
     };
-
-    try {
-      const url = editMode ? `http://localhost:8080/tasks/${selectedTaskId}` : "http://localhost:8080/tasks/";
-      const method = editMode ? "PUT" : "POST";
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(taskPayload),
-      });
-
-      if (!response.ok) {
-        console.error(`Failed to ${editMode ? "update" : "add"} task:`, response.statusText);
-        return;
-      }
-
-      // Fetch tasks again to update the table
-      await fetchTasks();
-
-      // Clear form and reset edit mode
-      setTaskName("");
-      setAssignedDate("");
-      setDeadlineDate("");
-      setTaskStartDate("");
-      setTaskEndDate("");
-      setTotalHours("");
-      setErrors({});
-      setEditMode(false);
-      setSelectedTaskId(null);
-    } catch (error) {
-      console.error(`Network error while ${editMode ? "updating" : "adding"} task:`, error);
-    }
+    setTasks([...tasks, newTask]);
+    setTaskName("");
+    setAssignedDate("");
+    setDeadlineDate("");
+    setTaskStartDate("");
+    setTaskEndDate("");
+    setTotalHours("");
+    setErrors({});
   };
 
-  const handleMagicClick = () => {
-    setShowGraphs(true);
-  };
-
-  const handleEditTask = (task) => {
-    setTaskName(task.taskName);
-    setAssignedDate(task.assignedDate);
-    setDeadlineDate(task.deadlineDate);
-    setTaskStartDate(task.taskStartDate);
-    setTaskEndDate(task.taskEndDate);
-    setTotalHours(task.totalNoHours);
-    setEditMode(true);
-    setSelectedTaskId(task.taskId);
+  const handleSubmitTasks = () => {
+    console.log("Tasks Data:", tasks);
   };
 
   const calculateStatus = (endDate, deadline) => {
@@ -178,34 +121,22 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
     }
   };
 
-  const updateTaskStatusCounts = (tasks) => {
+  const handleDeleteTask = (index) => {
+    const updatedTasks = tasks.filter((_, taskIndex) => taskIndex !== index);
+    setTasks(updatedTasks);
+  };
+
+  const getTaskStatusCounts = () => {
     const counts = { beforeTime: 0, onTime: 0, late: 0 };
     tasks.forEach((task) => {
-      const status = calculateStatus(task.taskEndDate, task.deadlineDate);
-      if (status === 0) counts.beforeTime++;
-      else if (status === 1) counts.onTime++;
-      else if (status === -1) counts.late++;
+      if (task.status === 0) counts.beforeTime++;
+      else if (task.status === 1) counts.onTime++;
+      else if (task.status === -1) counts.late++;
     });
-    setTaskStatusCounts(counts);
+    return counts;
   };
 
-  const handleDeleteTask = async (taskId) => {
-    try {
-      const response = await fetch(`http://localhost:8080/tasks/${taskId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        console.error("Failed to delete task:", response.statusText);
-        return;
-      }
-
-      // Fetch tasks again to update the table after deletion
-      await fetchTasks();
-    } catch (error) {
-      console.error("Network error while deleting task:", error);
-    }
-  };
+  const taskStatusCounts = getTaskStatusCounts();
 
   const data = {
     labels: ['Completed Before Time', 'Completed On Time', 'Completed Late'],
@@ -255,11 +186,35 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
     },
   };
 
+  // Line chart data
+  const lineData = {
+    labels: tasks.map((task) => task.taskName),
+    datasets: [
+      {
+        label: 'Total Hours per Task',
+        data: tasks.map((task) => task.totalHours),
+        fill: false,
+        borderColor: '#4CAF50',
+        tension: 0.1,
+      },
+    ],
+  };
+
+  const lineOptions = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Total Hours per Task',
+      },
+    },
+  };
+
   return (
     <div className="flex flex-row items-start justify-center min-h-screen p-4 bg-gray-100 gap-4">
       {/* Left side card for form and task table */}
-      <div ref={leftCardRef} className="w-2/4 p-8 bg-white rounded-lg shadow-md flex flex-col overflow-auto" style={{ minHeight: '500px' }}>
-        <h2 className="text-xl font-semibold mb-4">{editMode ? "Edit Task" : "Add Tasks for This Week"}</h2>
+      <div ref={leftCardRef} className="w-2/4 p-8 bg-white rounded-lg shadow-md flex flex-col overflow-auto" >
+        <h2 className="text-xl font-semibold mb-4">Add Tasks for This Week</h2>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label className="font-semibold">Task Name</label>
@@ -271,6 +226,7 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {errors.taskName && <p className="text-red-500">{errors.taskName}</p>}
+
             <label className="font-semibold">Assigned Date</label>
             <input
               type="date"
@@ -279,6 +235,7 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
               placeholder="Assigned Date"
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+
             <label className="font-semibold">Deadline Date</label>
             <input
               type="date"
@@ -288,6 +245,8 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
               placeholder="Deadline Date"
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            {errors.deadlineDate && <p className="text-red-500">{errors.deadlineDate}</p>}
+
             <label className="font-semibold">Task Start Date</label>
             <input
               type="date"
@@ -297,6 +256,8 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
               placeholder="Task Start Date"
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            {errors.taskStartDate && <p className="text-red-500">{errors.taskStartDate}</p>}
+
             <label className="font-semibold">Task End Date</label>
             <input
               type="date"
@@ -306,6 +267,8 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
               placeholder="Task End Date"
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            {errors.taskEndDate && <p className="text-red-500">{errors.taskEndDate}</p>}
+
             <label className="font-semibold">Total Number of Hours</label>
             <input
               type="number"
@@ -314,35 +277,36 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
               placeholder="Total Number of Hours"
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            {errors.totalHours && <p className="text-red-500">{errors.totalHours}</p>}
             <button
-              onClick={handleAddOrUpdateTask}
+              onClick={handleAddTask}
               className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all mt-4"
             >
-              <FaPlus /> {editMode ? "Update Task" : "Add Task"}
+              <FaPlus /> Add Task
             </button>
             <button
-              onClick={handleMagicClick}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-all mt-4"
+              onClick={handleSubmitTasks}
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-all mt-4"
             >
-              <FaMagic /> Show Graphs
+              Submit Tasks
             </button>
           </div>
         </div>
-          <div className="mt-8" >
-            <h2 className="text-xl font-semibold mb-4">Tasks Overview</h2>
-        {tasks.length > 0 && (
+        {/* Task table */}
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold mb-4">Tasks Overview</h2>
+          {tasks.length > 0 ? (
             <div className="">
-              <table 
-              style={{
+              <table
+                style={{
                   maxHeight: '12rem',
                   width: '100%',
                   overflowY: 'auto',
                 }}
-                className="bg-white border rounded">
+                className="bg-white border rounded"
+              >
                 <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 1 }}>
                   <tr className="flex m-2">
-                  <th
+                    <th
                       className="px-4 py-2"
                       style={{
                         display: 'table',
@@ -380,6 +344,7 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
                     </th>
                   </tr>
                 </thead>
+
                 <tbody
                   style={{
                     maxHeight: '12rem',
@@ -388,28 +353,28 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
                   }}
                 >
                   {tasks.map((task, index) => (
-                    <tr 
-                    key={index} 
-                    className={`text-center ${calculateStatus(task.taskEndDate, task.deadlineDate) === 0 ? 'bg-green-100' : calculateStatus(task.taskEndDate, task.deadlineDate) === 1 ? 'bg-yellow-100' : 'bg-red-100'}`}
-                    style={{
-                      display: 'table',
-                      width: '100%',
-                      tableLayout: 'fixed',
-                    }}
+                    <tr
+                      key={task.id}
+                      className={`text-center ${task.status === 0 ? 'bg-green-100' : task.status === 1 ? 'bg-yellow-100' : 'bg-red-100'}`}
+                      style={{
+                        display: 'table',
+                        width: '100%',
+                        tableLayout: 'fixed',
+                      }}
                     >
+                      
+
                       <td className="px-4 py-2 border">{task.taskName}</td>
                       <td className="px-4 py-2 border">
-                        {calculateStatus(task.taskEndDate, task.deadlineDate) === 0 ? "Completed Before Time" : calculateStatus(task.taskEndDate, task.deadlineDate) === 1 ? "Completed On Time" : "Completed Late"}
+                        {task.status === 0
+                          ? 'Completed Before Time'
+                          : task.status === 1
+                            ? 'Completed On Time'
+                            : 'Completed Late'}
                       </td>
-                      <td className="px-4 py-2 border items-center justify-center gap-2">
+                      <td className="px-4 py-2 border">
                         <button
-                          onClick={() => handleEditTask(task)}
-                          className="text-blue-500 hover:text-blue-700 transition-all mr-5"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTask(task.taskId)}
+                          onClick={() => handleDeleteTask(index)}
                           className="text-red-500 hover:text-red-700 transition-all"
                         >
                           <FaTrash />
@@ -420,21 +385,28 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
                 </tbody>
               </table>
             </div>
-        )}
+          ) : (
+            <p className="text-gray-500">No tasks added yet. Start by adding some tasks!</p>
+          )}
         </div>
 
 
       </div>
-      {showGraphs && (
-        <div ref={rightCardRef} className="w-2/4 p-8 bg-white rounded-lg shadow-md flex flex-col overflow-auto" style={{ minHeight: '500px' }}>
-          <h2 className="text-2xl font-semibold mb-6 text-center">Task Completion Status</h2>
-          <Bar data={data} options={options} />
-          <div className="mt-8" style={{ height: '400px' }}>
-            <h2 className="text-2xl font-semibold mb-6 text-center">Task Completion Percentage</h2>
-            <Pie data={pieData} options={pieOptions} />
-          </div>
+
+      {/* Right side card for displaying bar chart and pie chart */}
+      <div ref={rightCardRef} className="w-2/4 p-8 bg-white rounded-lg shadow-md flex flex-col overflow-auto" style={{ minHeight: '500px' }}>
+        {/* <h2 className="text-2xl font-semibold mb-6 text-center">Task Completion Status</h2>
+        <Bar data={data} options={options} /> */}
+        <div className="mt-8" style={{ height: '400px' }}>
+          <h2 className="text-2xl font-semibold mb-6 text-center">Task Completion Percentage</h2>
+          <Pie data={pieData} options={pieOptions} />
         </div>
-      )}
+        <div className="mt-20" style={{ height: '400px' }}>
+          <h2 className="text-2xl font-semibold mb-6 text-center">Line Graph</h2>
+          <center><Line data={lineData} options={lineOptions} height={200}/></center>
+        </div>
+         
+      </div>
     </div>
   );
 };
