@@ -4,9 +4,24 @@ import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import { Bar, Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { Line } from 'react-chartjs-2';
+// import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, LineElement, PointElement } from 'chart.js';
 
-ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement);
+// Registering necessary elements
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement, // For Pie chart
+  LineElement, // For Line chart
+  PointElement // For Line chart
+);
+
+// ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement);
 
 export const DashboardPage = () => {
   const authRequest = {
@@ -169,10 +184,34 @@ export const DashboardPageContent = () => {
     },
   };
 
+  // Line chart data
+  const lineData = {
+    labels: tasks.map((task) => task.taskName),
+    datasets: [
+      {
+        label: 'Total Hours per Task',
+        data: tasks.map((task) => task.totalHours),
+        fill: false,
+        borderColor: '#4CAF50',
+        tension: 0.1,
+      },
+    ],
+  };
+
+  const lineOptions = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Total Hours per Task',
+      },
+    },
+  };
+
   return (
     <div className="flex flex-row items-start justify-center min-h-screen p-4 bg-gray-100 gap-4">
       {/* Left side card for form and task table */}
-      <div ref={leftCardRef} className="w-2/4 p-8 bg-white rounded-lg shadow-md flex flex-col overflow-auto" style={{ minHeight: '500px' }}>
+      <div ref={leftCardRef} className="w-2/4 p-8 bg-white rounded-lg shadow-md flex flex-col overflow-auto" >
         <h2 className="text-xl font-semibold mb-4">Add Tasks for This Week</h2>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
@@ -251,24 +290,83 @@ export const DashboardPageContent = () => {
           </div>
         </div>
         {/* Task table */}
-        <div className="mt-8 overflow-auto">
+        <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Tasks Overview</h2>
           {tasks.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border rounded">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-2 border">Task Name</th>
-                    <th className="px-4 py-2 border">Status</th>
-                    <th className="px-4 py-2 border">Actions</th>
+            <div className="">
+              <table
+                style={{
+                  maxHeight: '12rem',
+                  width: '100%',
+                  overflowY: 'auto',
+                }}
+                className="bg-white border rounded"
+              >
+                <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 1 }}>
+                  <tr className="flex m-2">
+                    <th
+                      className="px-4 py-2"
+                      style={{
+                        display: 'table',
+                        width: '33%',
+                        tableLayout: 'fixed',
+                        textAlign: 'center',
+                        verticalAlign: 'middle',
+                      }}
+                    >
+                      Task Name
+                    </th>
+                    <th
+                      className="px-4 py-2"
+                      style={{
+                        display: 'table',
+                        width: '33%',
+                        tableLayout: 'fixed',
+                        textAlign: 'center',
+                        verticalAlign: 'middle',
+                      }}
+                    >
+                      Status
+                    </th>
+                    <th
+                      className="px-4 py-2"
+                      style={{
+                        display: 'table',
+                        width: '33%',
+                        tableLayout: 'fixed',
+                        textAlign: 'center',
+                        verticalAlign: 'middle',
+                      }}
+                    >
+                      Actions
+                    </th>
                   </tr>
                 </thead>
-                <tbody>
+
+                <tbody
+                  style={{
+                    maxHeight: '12rem',
+                    overflowY: 'auto',
+                    display: 'block',
+                  }}
+                >
                   {tasks.map((task, index) => (
-                    <tr key={index} className={`text-center ${task.status === 0 ? 'bg-green-100' : task.status === 1 ? 'bg-yellow-100' : 'bg-red-100'}`}>
+                    <tr
+                      key={task.id}
+                      className={`text-center ${task.status === 0 ? 'bg-green-100' : task.status === 1 ? 'bg-yellow-100' : 'bg-red-100'}`}
+                      style={{
+                        display: 'table',
+                        width: '100%',
+                        tableLayout: 'fixed',
+                      }}
+                    >
                       <td className="px-4 py-2 border">{task.taskName}</td>
                       <td className="px-4 py-2 border">
-                        {task.status === 0 ? "Completed Before Time" : task.status === 1 ? "Completed On Time" : "Completed Late"}
+                        {task.status === 0
+                          ? 'Completed Before Time'
+                          : task.status === 1
+                            ? 'Completed On Time'
+                            : 'Completed Late'}
                       </td>
                       <td className="px-4 py-2 border">
                         <button
@@ -287,16 +385,23 @@ export const DashboardPageContent = () => {
             <p className="text-gray-500">No tasks added yet. Start by adding some tasks!</p>
           )}
         </div>
+
+
       </div>
 
       {/* Right side card for displaying bar chart and pie chart */}
       <div ref={rightCardRef} className="w-2/4 p-8 bg-white rounded-lg shadow-md flex flex-col overflow-auto" style={{ minHeight: '500px' }}>
-        <h2 className="text-2xl font-semibold mb-6 text-center">Task Completion Status</h2>
-        <Bar data={data} options={options} />
+        {/* <h2 className="text-2xl font-semibold mb-6 text-center">Task Completion Status</h2>
+        <Bar data={data} options={options} /> */}
         <div className="mt-8" style={{ height: '400px' }}>
           <h2 className="text-2xl font-semibold mb-6 text-center">Task Completion Percentage</h2>
           <Pie data={pieData} options={pieOptions} />
         </div>
+        <div className="mt-20" style={{ height: '400px' }}>
+          <h2 className="text-2xl font-semibold mb-6 text-center">Line Graph</h2>
+          <center><Line data={lineData} options={lineOptions} height={200}/></center>
+        </div>
+         
       </div>
     </div>
   );
