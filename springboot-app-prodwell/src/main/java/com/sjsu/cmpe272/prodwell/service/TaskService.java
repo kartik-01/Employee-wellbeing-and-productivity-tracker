@@ -45,7 +45,7 @@ public class TaskService {
     }
 
     // Get task by its ID
-    public Task getTaskByTaskId(UUID taskId) {
+    public Task getTaskByTaskId(String taskId) {
         return taskRepository.findByTaskId(taskId);
     }
 
@@ -61,7 +61,7 @@ public class TaskService {
     }
 
     // Delete task by its ID
-    public void deleteTask(UUID taskId) {
+    public void deleteTask(String taskId) {
         Task task = taskRepository.findByTaskId(taskId);
         if (task != null) {
             taskRepository.delete(task);

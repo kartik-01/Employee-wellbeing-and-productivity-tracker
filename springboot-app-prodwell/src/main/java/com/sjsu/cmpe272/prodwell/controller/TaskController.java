@@ -40,13 +40,13 @@ public class TaskController {
 
     // Endpoint to get a task by its ID
     @GetMapping("/{taskId}")
-    public Task getTaskByTaskId(@PathVariable UUID taskId) {
+    public Task getTaskByTaskId(@PathVariable String taskId) {
         return taskService.getTaskByTaskId(taskId);
     }
 
     // Endpoint to update an existing task
     @PutMapping("/{taskId}")
-    public Task updateTask(@PathVariable UUID taskId, @RequestBody Task task) {
+    public Task updateTask(@PathVariable String taskId, @RequestBody Task task) {
         task.setTaskId(taskId);
         return taskService.updateTask(task);
     }
@@ -54,7 +54,7 @@ public class TaskController {
     // Endpoint to delete a task by its ID
     @DeleteMapping("/{taskId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTask(@PathVariable UUID taskId) {
+    public void deleteTask(@PathVariable String taskId) {
         taskService.deleteTask(taskId);
     }
 }

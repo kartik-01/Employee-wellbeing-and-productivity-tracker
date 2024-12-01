@@ -20,7 +20,7 @@ public class Task {
     @Id
     @JsonIgnore
     private ObjectId id;
-    private UUID taskId;
+    private String taskId;
     private String userId;
     private String taskName;
     private LocalDate assignedDate;
@@ -31,7 +31,7 @@ public class Task {
 
     public void generateTaskId() {
         if (this.taskId == null) {
-            this.taskId = UUID.randomUUID();
+            this.taskId = UUID.randomUUID().toString();
         }
     }
 }

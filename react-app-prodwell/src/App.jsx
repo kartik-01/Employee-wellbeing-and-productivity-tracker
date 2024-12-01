@@ -46,7 +46,7 @@ const Pages = ({ userId, setUserId }) => {
                 userService.checkAndCreateUser(userData)
                     .then(response => {
                         console.log('User check/create response:', response.data);
-                        setUserId(response.data.id);
+                        setUserId(response.data.oid);
                     })
                     .catch(error => {
                         console.error('Error checking/creating user:', error);

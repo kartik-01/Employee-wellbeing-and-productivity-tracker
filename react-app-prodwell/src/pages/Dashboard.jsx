@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MsalAuthenticationTemplate } from '@azure/msal-react';
 import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
-import { FaPlus, FaTrash, FaMagic } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaMagic, FaEdit } from 'react-icons/fa';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 
@@ -34,11 +34,12 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
   const [errors, setErrors] = useState({});
   const [showGraphs, setShowGraphs] = useState(false);
   const [taskStatusCounts, setTaskStatusCounts] = useState({ beforeTime: 0, onTime: 0, late: 0 });
+  const [editMode, setEditMode] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
   const leftCardRef = useRef(null);
   const rightCardRef = useRef(null);
 
   useEffect(() => {
-    // Fetch tasks on component mount if userId is available
     if (userId) {
       fetchTasks();
     }
@@ -74,11 +75,14 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
     }
   };
 
-  const handleAddTask = async () => {
+  const handleAddOrUpdateTask = async () => {
     const validationErrors = {};
 
-    if (taskName.trim() === "") {
+    const taskNamePattern = /^[a-zA-Z\s\-]+$/;
+    if (!taskName.trim()) {
       validationErrors.taskName = "Task name is required.";
+    } else if (!taskNamePattern.test(taskName)) {
+      validationErrors.taskName = "Task name can only contain letters, hyphens, and spaces.";
     }
 
     if (assignedDate && taskStartDate && new Date(taskStartDate) < new Date(assignedDate)) {
@@ -93,12 +97,16 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       validationErrors.taskEndDate = "Task end date cannot be before the start date.";
     }
 
+    if (totalHours && (isNaN(totalHours) || totalHours <= 0 || totalHours >= 45)) {
+      validationErrors.totalHours = "Total number of hours must be a number greater than 0 and less than 45.";
+    }
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
-    const newTask = {
+    const taskPayload = {
       taskName,
       assignedDate,
       deadlineDate,
@@ -109,36 +117,53 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
     };
 
     try {
-      const response = await fetch("http://localhost:8080/tasks/", {
-        method: "POST",
+      const url = editMode ? `http://localhost:8080/tasks/${selectedTaskId}` : "http://localhost:8080/tasks/";
+      const method = editMode ? "PUT" : "POST";
+      
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newTask),
+        body: JSON.stringify(taskPayload),
       });
 
       if (!response.ok) {
-        console.error("Failed to add task:", response.statusText);
+        console.error(`Failed to ${editMode ? "update" : "add"} task:`, response.statusText);
         return;
       }
 
-      // Fetch tasks again to update the table with new task
+      // Fetch tasks again to update the table
       await fetchTasks();
-    } catch (error) {
-      console.error("Network error while adding task:", error);
-    }
 
-    setTaskName("");
-    setAssignedDate("");
-    setDeadlineDate("");
-    setTaskStartDate("");
-    setTaskEndDate("");
-    setTotalHours("");
-    setErrors({});
+      // Clear form and reset edit mode
+      setTaskName("");
+      setAssignedDate("");
+      setDeadlineDate("");
+      setTaskStartDate("");
+      setTaskEndDate("");
+      setTotalHours("");
+      setErrors({});
+      setEditMode(false);
+      setSelectedTaskId(null);
+    } catch (error) {
+      console.error(`Network error while ${editMode ? "updating" : "adding"} task:`, error);
+    }
   };
 
   const handleMagicClick = () => {
     setShowGraphs(true);
+  };
+
+  const handleEditTask = (task) => {
+    setTaskName(task.taskName);
+    setAssignedDate(task.assignedDate);
+    setDeadlineDate(task.deadlineDate);
+    setTaskStartDate(task.taskStartDate);
+    setTaskEndDate(task.taskEndDate);
+    setTotalHours(task.totalNoHours);
+    setEditMode(true);
+    setSelectedTaskId(task.taskId);
   };
 
   const calculateStatus = (endDate, deadline) => {
@@ -164,10 +189,22 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
     setTaskStatusCounts(counts);
   };
 
-  const handleDeleteTask = (index) => {
-    const updatedTasks = tasks.filter((_, taskIndex) => taskIndex !== index);
-    setTasks(updatedTasks);
-    updateTaskStatusCounts(updatedTasks);
+  const handleDeleteTask = async (taskId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/tasks/${taskId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        console.error("Failed to delete task:", response.statusText);
+        return;
+      }
+
+      // Fetch tasks again to update the table after deletion
+      await fetchTasks();
+    } catch (error) {
+      console.error("Network error while deleting task:", error);
+    }
   };
 
   const data = {
@@ -222,7 +259,7 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
     <div className="flex flex-row items-start justify-center min-h-screen p-4 bg-gray-100 gap-4">
       {/* Left side card for form and task table */}
       <div ref={leftCardRef} className="w-2/4 p-8 bg-white rounded-lg shadow-md flex flex-col overflow-auto" style={{ minHeight: '500px' }}>
-        <h2 className="text-xl font-semibold mb-4">Add Tasks for This Week</h2>
+        <h2 className="text-xl font-semibold mb-4">{editMode ? "Edit Task" : "Add Tasks for This Week"}</h2>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label className="font-semibold">Task Name</label>
@@ -277,11 +314,12 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
               placeholder="Total Number of Hours"
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            {errors.totalHours && <p className="text-red-500">{errors.totalHours}</p>}
             <button
-              onClick={handleAddTask}
+              onClick={handleAddOrUpdateTask}
               className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all mt-4"
             >
-              <FaPlus /> Add Task
+              <FaPlus /> {editMode ? "Update Task" : "Add Task"}
             </button>
             <button
               onClick={handleMagicClick}
@@ -310,9 +348,15 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
                       <td className="px-4 py-2 border">
                         {calculateStatus(task.taskEndDate, task.deadlineDate) === 0 ? "Completed Before Time" : calculateStatus(task.taskEndDate, task.deadlineDate) === 1 ? "Completed On Time" : "Completed Late"}
                       </td>
-                      <td className="px-4 py-2 border">
+                      <td className="px-4 py-2 border flex items-center justify-center gap-2">
                         <button
-                          onClick={() => handleDeleteTask(index)}
+                          onClick={() => handleEditTask(task)}
+                          className="text-blue-500 hover:text-blue-700 transition-all"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTask(task.taskId)}
                           className="text-red-500 hover:text-red-700 transition-all"
                         >
                           <FaTrash />

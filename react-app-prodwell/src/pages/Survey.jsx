@@ -4,15 +4,15 @@ import { FaArrowRight, FaArrowLeft } from 'react-icons/fa';
 import { MsalAuthenticationTemplate } from '@azure/msal-react';
 import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export const SurveyPage = ({ userId, setUserId }) => {
   const authRequest = {
     ...loginRequest,
   };
   return (
-    <MsalAuthenticationTemplate 
-      interactionType={InteractionType.Redirect} 
+    <MsalAuthenticationTemplate
+      interactionType={InteractionType.Redirect}
       authenticationRequest={authRequest}
     >
       <SurveyPageContent userId={userId} setUserId={setUserId} />
@@ -24,8 +24,9 @@ const SurveyPageContent = ({ userId, setUserId }) => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [isNextDisabled, setIsNextDisabled] = useState(true);
+  const [otherTextError, setOtherTextError] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -35,7 +36,7 @@ const SurveyPageContent = ({ userId, setUserId }) => {
           (item) => item.question && item.type && item.options
         );
         const formattedQuestions = validQuestions.map((item) => ({
-          questionId: item.id.timestamp,
+          questionId: item.questionId,
           category: "Personality",
           question: item.question,
           type: item.type,
@@ -50,28 +51,44 @@ const SurveyPageContent = ({ userId, setUserId }) => {
     fetchQuestions();
   }, []);
 
+  useEffect(() => {
+    const currentQuestion = questions[currentQuestionIndex];
+    if (currentQuestion) {
+      validateAnswer(currentQuestion.questionId, selectedAnswers[currentQuestion.questionId] || []);
+    }
+  }, [currentQuestionIndex, questions]);
+
   const handleAnswerChange = (questionId, answer) => {
     setSelectedAnswers({
       ...selectedAnswers,
       [questionId]: answer,
     });
+
+    if (answer === 'Other (Please specify)') {
+      validateOtherText(questionId, selectedAnswers[`other-${questionId}`] || '');
+    } else {
+      setOtherTextError('');
+      setIsNextDisabled(false); // Enable "Next" button if valid answer is selected
+    }
   };
 
   const handleCheckboxChange = (questionId, answer) => {
     const currentAnswers = selectedAnswers[questionId] || [];
     const isSelected = currentAnswers.includes(answer);
 
+    let updatedAnswers;
     if (isSelected) {
-      setSelectedAnswers({
-        ...selectedAnswers,
-        [questionId]: currentAnswers.filter((item) => item !== answer),
-      });
+      updatedAnswers = currentAnswers.filter((item) => item !== answer);
     } else {
-      setSelectedAnswers({
-        ...selectedAnswers,
-        [questionId]: [...currentAnswers, answer],
-      });
+      updatedAnswers = [...currentAnswers, answer];
     }
+
+    setSelectedAnswers({
+      ...selectedAnswers,
+      [questionId]: updatedAnswers,
+    });
+
+    validateAnswer(questionId, updatedAnswers);
   };
 
   const handleOtherTextChange = (questionId, value) => {
@@ -79,9 +96,48 @@ const SurveyPageContent = ({ userId, setUserId }) => {
       ...selectedAnswers,
       [`other-${questionId}`]: value,
     });
+
+    validateOtherText(questionId, value);
   };
 
-  const handleNext = async () => {
+  const validateOtherText = (questionId, value) => {
+    const validChars = /^[A-Za-z\s]*$/;
+
+    if (!validChars.test(value)) {
+      setOtherTextError("Only letters are allowed.");
+      setIsNextDisabled(true);
+    } else if (value.length < 2 || value.length > 30) {
+      setOtherTextError("Must be between 2-30 characters.");
+      setIsNextDisabled(true);
+    } else {
+      setOtherTextError('');
+      validateAnswer(questionId, selectedAnswers[questionId] || []);
+    }
+  };
+
+  const validateAnswer = (questionId, answer) => {
+    if (Array.isArray(answer)) {
+      if (answer.includes('Other (Please specify)')) {
+        const otherText = selectedAnswers[`other-${questionId}`];
+        if (!otherText || otherText.length < 2 || otherText.length > 30 || !/^[A-Za-z\s]*$/.test(otherText)) {
+          setIsNextDisabled(true);
+          return;
+        }
+      }
+      setIsNextDisabled(answer.length === 0);
+    } else {
+      if (answer === 'Other (Please specify)') {
+        const otherText = selectedAnswers[`other-${questionId}`];
+        if (!otherText || otherText.length < 2 || otherText.length > 30 || !/^[A-Za-z\s]*$/.test(otherText)) {
+          setIsNextDisabled(true);
+          return;
+        }
+      }
+      setIsNextDisabled(!answer);
+    }
+  };
+
+  const handleNext = () => {
     if (isAnswerValid(currentQuestionIndex)) {
       const currentQuestion = questions[currentQuestionIndex];
 
@@ -100,20 +156,9 @@ const SurveyPageContent = ({ userId, setUserId }) => {
         });
       }
 
-      const answerPayload = {
-        userId: userId, // Replace with actual user ID if available
-        questionId: currentQuestion.questionId,
-        answer: selectedAnswers[currentQuestion.questionId],
-      };
-
-      try {
-        await axios.post('http://localhost:8080/personalityAnswers/', answerPayload);
-      } catch (error) {
-        console.error('Error saving answer:', error);
-      }
-
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
+        setIsNextDisabled(true);
       }
     }
   };
@@ -124,11 +169,36 @@ const SurveyPageContent = ({ userId, setUserId }) => {
     }
   };
 
-  const handleSubmit = () => {
-    console.log("Survey submitted, navigating to dashboard...");
-    console.log("Selected Answers:", selectedAnswers);
-    navigate('/dashboard');
+  const handleSubmit = async () => {
+    // Prepare the payload by processing the selectedAnswers object.
+    const processedAnswers = Object.entries(selectedAnswers).reduce((acc, [key, value]) => {
+      // Check if the key contains the "other-" prefix and map it back to the original question ID.
+      if (key.startsWith('other-')) {
+        const originalQuestionId = key.replace('other-', '');
+        acc[originalQuestionId] = value;
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+  
+    const payload = {
+      userId: userId,
+      answers: Object.entries(processedAnswers).map(([questionId, answer]) => ({
+        questionId,
+        answer: Array.isArray(answer) ? answer : [answer],
+      })),
+    };
+  
+    try {
+      await axios.post('http://localhost:8080/personalityAnswers/', payload);
+      console.log("Survey submitted successfully.");
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error submitting survey:', error);
+    }
   };
+  
 
   const isAnswerValid = (index) => {
     const question = questions[index];
@@ -167,6 +237,19 @@ const SurveyPageContent = ({ userId, setUserId }) => {
                     className="mr-2"
                   />
                   {option}
+                  {option === 'Other (Please specify)' && selectedAnswers[currentQuestion.questionId] === 'Other (Please specify)' && (
+                    <div className="flex flex-col w-full ml-2 mt-1">
+                      <input
+                        type="text"
+                        placeholder="Please specify"
+                        value={selectedAnswers[`other-${currentQuestion.questionId}`] || ''}
+                        onChange={(e) => handleOtherTextChange(currentQuestion.questionId, e.target.value)}
+                        className="p-1 border rounded w-full"
+                        required
+                      />
+                      {otherTextError && <p className="text-red-500 text-sm mt-1">{otherTextError}</p>}
+                    </div>
+                  )}
                 </label>
               ))}
             </div>
@@ -185,14 +268,17 @@ const SurveyPageContent = ({ userId, setUserId }) => {
                   />
                   {option}
                   {option === 'Other (Please specify)' && selectedAnswers[currentQuestion.questionId]?.includes(option) && (
-                    <input
-                      type="text"
-                      placeholder="Please specify"
-                      value={selectedAnswers[`other-${currentQuestion.questionId}`] || ''}
-                      onChange={(e) => handleOtherTextChange(currentQuestion.questionId, e.target.value)}
-                      className="ml-2 p-1 border rounded w-full"
-                      required
-                    />
+                    <div className="flex flex-col w-full ml-2 mt-1">
+                      <input
+                        type="text"
+                        placeholder="Please specify"
+                        value={selectedAnswers[`other-${currentQuestion.questionId}`] || ''}
+                        onChange={(e) => handleOtherTextChange(currentQuestion.questionId, e.target.value)}
+                        className="p-1 border rounded w-full"
+                        required
+                      />
+                      {otherTextError && <p className="text-red-500 text-sm mt-1">{otherTextError}</p>}
+                    </div>
                   )}
                 </label>
               ))}
@@ -223,7 +309,7 @@ const SurveyPageContent = ({ userId, setUserId }) => {
           {currentQuestionIndex < questions.length - 1 ? (
             <button
               onClick={handleNext}
-              disabled={!isAnswerValid(currentQuestionIndex)}
+              disabled={isNextDisabled || !isAnswerValid(currentQuestionIndex)}
               className="px-6 py-3 text-white bg-[#6200ea] rounded-lg hover:bg-[#4a00b4] disabled:opacity-50"
             >
               <FaArrowRight />
@@ -231,7 +317,7 @@ const SurveyPageContent = ({ userId, setUserId }) => {
           ) : (
             <button
               onClick={handleSubmit}
-              disabled={!isAnswerValid(currentQuestionIndex)}
+              disabled={isNextDisabled || !isAnswerValid(currentQuestionIndex)}
               className="px-6 py-3 text-white bg-[#6200ea] rounded-lg hover:bg-[#4a00b4] disabled:opacity-50"
             >
               Submit
