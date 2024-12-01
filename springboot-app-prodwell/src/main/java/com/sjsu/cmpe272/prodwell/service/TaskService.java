@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -21,8 +22,8 @@ public class TaskService {
 
     // Save a new task
     public Task saveTask(Task task) {
-        if (!userRepository.existsByOid(task.getUserId())) {
-            throw new IllegalArgumentException("Invalid userId: " + task.getUserId());
+        if (!userRepository.existsByOid(task.getOid())) {
+            throw new IllegalArgumentException("Invalid userId: " + task.getOid());
         }
         task.generateTaskId();
         return taskRepository.save(task);
@@ -31,8 +32,8 @@ public class TaskService {
     // Bulk save tasks
     public List<Task> saveTasks(List<Task> tasks) {
         tasks.forEach(task -> {
-            if (!userRepository.existsByOid(task.getUserId())) {
-                throw new IllegalArgumentException("Invalid userOid: " + task.getUserId());
+            if (!userRepository.existsByOid(task.getOid())) {
+                throw new IllegalArgumentException("Invalid userOid: " + task.getOid());
             }
             task.generateTaskId();
         });
@@ -40,8 +41,8 @@ public class TaskService {
     }
 
     // Get all tasks assigned to a user (by oid)
-    public List<Task> getTasksByUserOid(String userOid) {
-        return taskRepository.findByUserId(userOid);
+    public List<Task> getTasksByUserOid(String oid) {
+        return taskRepository.findByOid(oid);
     }
 
     // Get task by its ID
@@ -51,8 +52,8 @@ public class TaskService {
 
     // Update an existing task
     public Task updateTask(Task task) {
-        if (!userRepository.existsByOid(task.getUserId())) {
-            throw new IllegalArgumentException("Invalid userOid: " + task.getUserId());
+        if (!userRepository.existsByOid(task.getOid())) {
+            throw new IllegalArgumentException("Invalid userOid: " + task.getOid());
         }
         if (task.getTaskId() == null) {
             task.generateTaskId();
