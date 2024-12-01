@@ -25,7 +25,7 @@ public class PersonalityAnswerService {
 
     public PersonalityAnswer saveOrUpdateAnswer(PersonalityAnswer newAnswer) {
         // Check if the record already exists for the given userId
-        Optional<PersonalityAnswer> existingAnswerOptional = repository.findById(newAnswer.getUserId());
+        Optional<PersonalityAnswer> existingAnswerOptional = repository.findByOid(newAnswer.getOid());
 
         if (existingAnswerOptional.isPresent()) {
             // Update existing record
@@ -60,12 +60,12 @@ public class PersonalityAnswerService {
         }
     }
 
-    public Optional<PersonalityAnswer> getAnswerByUserId(String userId) {
-        return repository.findById(userId);
+    public Optional<PersonalityAnswer> getAnswerByUserId(String oid) {
+        return repository.findByOid(oid);
     }
 
-    public void deleteAnswerByUserId(String userId) {
-        repository.deleteById(userId);
+    public void deleteAnswerByUserId(String oid) {
+        repository.deleteByOid(oid);
     }
 
     // Get all answers (Optional)

@@ -19,9 +19,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PersonalityAnswer{
     @Id
-    private String userId;
+    @JsonIgnore
+    private ObjectId id;
+    private String oid;
     private List<QuestionAnswer> answers;
-    private LocalDateTime dateTime; // Timestamp for last update
+    private LocalDateTime dateTime;
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
