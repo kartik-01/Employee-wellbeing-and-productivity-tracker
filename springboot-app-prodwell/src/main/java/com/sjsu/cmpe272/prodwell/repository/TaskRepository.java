@@ -5,9 +5,10 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface TaskRepository extends MongoRepository<Task, String> {
-    List<Task> findByUserId(String userId);
-    Task findByTaskId(UUID taskId);
+    List<Task> findByOid(String oid);
+    Task findByTaskId(String taskId);
 }
