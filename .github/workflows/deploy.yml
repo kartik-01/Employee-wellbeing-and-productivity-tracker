@@ -13,9 +13,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
+      # Step 1: Checkout the code from the correct directory
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          # This checks out the code and places it in the correct folder
+          path: springboot-app-prodwell
 
       # Step 2: Set up JDK (if your backend uses Java)
       - name: Set up JDK 21
@@ -40,19 +43,20 @@ jobs:
       # Step 5: Create ZIP file of the backend code
       - name: Create ZIP of backend code
         run: |
-          zip -r backend.zip ./*
+          cd springboot-app-prodwell  # Navigate to the backend code folder
+          zip -r prodwell-backend.zip ./*
 
       # Step 6: Upload ZIP to S3 bucket
       - name: Upload to S3 bucket
         run: |
-          aws s3 cp backend.zip s3://${{ secrets.S3_BUCKET_NAME }}/backend.zip --no-progress
+          aws s3 cp springboot-app-prodwell/prodwell-backend.zip s3://${{ secrets.S3_BUCKET_NAME }}/prodwell-backend.zip --no-progress
 
       # Step 7: Trigger Elastic Beanstalk deployment
       - name: Deploy to Elastic Beanstalk
         run: |
-          aws elasticbeanstalk update-environment --application-name ${{ secrets.EB_APPLICATION_NAME }} --environment-name ${{ secrets.EB_ENVIRONMENT_NAME }} --version-label backend-$(date +%Y-%m-%d-%H-%M-%S) --s3-bucket ${{ secrets.S3_BUCKET_NAME }} --s3-key backend.zip
+          aws elasticbeanstalk update-environment --application-name ${{ secrets.EB_APPLICATION_NAME }} --environment-name ${{ secrets.EB_ENVIRONMENT_NAME }} --version-label prodwell-backend-$(date +%Y-%m-%d-%H-%M-%S) --s3-bucket ${{ secrets.S3_BUCKET_NAME }} --s3-key prodwell-backend.zip
 
       # Step 8: Clean up (optional, remove any downloaded files)
       - name: Clean up
         run: |
-          rm -f backend.zip
+          rm -f springboot-app-prodwell/prodwell-backend.zip
