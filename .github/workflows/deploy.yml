@@ -114,8 +114,8 @@ jobs:
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: ${{ secrets.EB_APPLICATION_NAME }}
-          environment_name: ${{ secrets.EB_ENVIRONMENT_NAME }}
+          application_name: "PW"
+          environment_name: "PW-env"
           version_label: ${{ github.sha }}
           region: us-east-2
           deployment_package: springboot-app-prodwell/target/springboot-app-prodwell-0.0.1-SNAPSHOT.jar
