@@ -27,6 +27,12 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      # Step 3: Build the Spring Boot application (this will generate the target/* files)
+      - name: Build the application with Maven
+        run: |
+          cd springboot-app-prodwell  # Navigate to the backend code folder
+          ./mvnw clean package -DskipTests  # Builds the application and skips tests (optional)
+
       # Step 3: Check if AWS CLI is already installed, if not, install it
       - name: Install AWS CLI (if not installed)
         run: |
