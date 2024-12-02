@@ -57,12 +57,17 @@ jobs:
         run: |
           aws s3 cp springboot-app-prodwell/prodwell-backend.zip s3://${{ secrets.S3_BUCKET_NAME }}/prodwell-backend.zip --no-progress
 
-      # Step 7: Trigger Elastic Beanstalk deployment
-      - name: Deploy to Elastic Beanstalk
+      # Step 7: Create a new application version in Elastic Beanstalk
+      - name: Create Elastic Beanstalk application version
         run: |
-          aws elasticbeanstalk update-environment --application-name ${{ secrets.EB_APPLICATION_NAME }} --environment-name ${{ secrets.EB_ENVIRONMENT_NAME }} --version-label prodwell-backend-$(date +%Y-%m-%d-%H-%M-%S) --s3-bucket ${{ secrets.S3_BUCKET_NAME }} --s3-key prodwell-backend.zip
+          aws elasticbeanstalk create-application-version --application-name ${{ secrets.EB_APPLICATION_NAME }} --version-label prodwell-backend-$(date +%Y-%m-%d-%H-%M-%S) --s3-bucket ${{ secrets.S3_BUCKET_NAME }} --s3-key prodwell-backend.zip
 
-      # Step 8: Clean up (optional, remove any downloaded files)
+      # Step 8: Update Elastic Beanstalk environment with the new application version
+      - name: Update Elastic Beanstalk environment
+        run: |
+          aws elasticbeanstalk update-environment --application-name ${{ secrets.EB_APPLICATION_NAME }} --environment-name ${{ secrets.EB_ENVIRONMENT_NAME }} --version-label prodwell-backend-$(date +%Y-%m-%d-%H-%M-%S)
+
+      # Step 9: Clean up (optional, remove any downloaded files)
       - name: Clean up
         run: |
           rm -f springboot-app-prodwell/prodwell-backend.zip
