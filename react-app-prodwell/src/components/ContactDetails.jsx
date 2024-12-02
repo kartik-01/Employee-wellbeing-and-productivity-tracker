@@ -1,5 +1,6 @@
 import React from "react";
 import FeatureCard from "./FeatureCard";
+import yash from "../assets/images/Yash.jpeg";
 
 const ContactDetails = () => (
   <section id="features" className="w-full bg-white py-16 px-8 text-center">
@@ -9,6 +10,7 @@ const ContactDetails = () => (
         description="SJSU ID: 017992624"
       />
       <FeatureCard
+        image = {yash}
         title="Yash Savani"
         description="SJSU ID: 017581122"
       />
