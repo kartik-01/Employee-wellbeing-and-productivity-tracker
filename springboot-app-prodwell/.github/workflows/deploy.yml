@@ -3,10 +3,10 @@ name: Deploy to AWS Elastic Beanstalk
 on:
   push:
     branches:
-      - develop  # Trigger on commit to the deployment branch
+      - test/deployment  # Trigger on commit to the deployment branch
   pull_request:
     branches:
-      - develop  # Trigger on PR to the deployment branch
+      - test/deployment  # Trigger on PR to the deployment branch
 
 jobs:
   deploy:
