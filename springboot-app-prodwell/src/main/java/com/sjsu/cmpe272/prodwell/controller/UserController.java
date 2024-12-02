@@ -5,7 +5,6 @@ import com.sjsu.cmpe272.prodwell.entity.UserDataDTO;
 import com.sjsu.cmpe272.prodwell.service.UserService;
 import com.sjsu.cmpe272.prodwell.service.UserDataService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,28 +27,17 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/{oid}/complete-data")
-    public ResponseEntity<UserDataDTO> getUserCompleteData(@PathVariable String oid) {
+    @PostMapping("/{oid}/ai-insights")
+    public ResponseEntity<String> getUserCompleteData(@PathVariable String oid) {
         UserDataDTO userData = userDataService.getUserData(oid);
-        if (userData.getUser() != null) {
-            return ResponseEntity.ok(userData);
+        if (userData.getUser() == null) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
-    }
-
-    @GetMapping("/test-llm")
-    public ResponseEntity<String> testLLMIntegration() {
-        try {
-            String response = userService.testLLMIntegration();
-            if (response == null) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to connect to LLM service");
-            }
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error testing LLM integration: " + e.getMessage());
+        
+        String analysis = userService.analyzeUserStress(userData);
+        if (analysis == null) {
+            return ResponseEntity.internalServerError().build();
         }
+        return ResponseEntity.ok(analysis);
     }
 }

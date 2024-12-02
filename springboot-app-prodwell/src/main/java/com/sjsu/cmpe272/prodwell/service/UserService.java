@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sjsu.cmpe272.prodwell.entity.User;
 import com.sjsu.cmpe272.prodwell.entity.UserDataDTO;
@@ -58,25 +59,42 @@ public class UserService {
         return null;
     }
 
-    public String testLLMIntegration() {
+    public String analyzeUserStress(UserDataDTO userData) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(PPLX_TOKEN);
     
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("model", "llama-3.1-sonar-large-128k-online");
+            requestBody.put("model", "llama-3.1-sonar-small-128k-online");
+            requestBody.put("temperature", 0.3);  // Lower temperature for more consistent outputs
             
             List<Map<String, String>> messages = new ArrayList<>();
             messages.add(Map.of(
                 "role", "system",
-                "content", "You are an AI assistant that evaluates employee stress levels based on metrics like HoursSpent where 8 is ideal. Always respond in a JSON format with two fields: 'stresslevel' (a number between 0 and 10, where 0 is the lowest stress and 5 is neutral) and 'suggestion' (a concise sentence providing feedback or advice based on the users Personality and likes - any one which seems appropriate, don't mention personality type in final output). Do not include any additional text or explanation outside of the JSON object."
+                "content", "You are an AI assistant that evaluates employee stress levels. " +
+                          "Calculate stress levels using this formula: " +
+                          "- Base stress (5) + Hours factor ((daily hours - 8) × 0.5) + Task overlap factor (concurrent tasks × 0.5) " +
+                          "- If hours > 8: add +1 for each hour over 8 " +
+                          "- If multiple tasks on same day: add +0.5 for each overlapping task " +
+                          "- If task end date is after deadline: add +2 " +
+                          "- Cap final stress level at 10 " +
+                          "Analyze the data and respond with a clean JSON object containing: " +
+                          "'name', 'dailyStressLevels' (array with date and stressLevel 0-10, calculated using above formula), " +
+                          "'averageStressLevel' (average of all daily levels, rounded to 2 decimals), " +
+                          "'analysis' object with: " +
+                          "'overview' (direct address to user about their personality and work pattern, starting with their first name), " +
+                          "'workloadAnalysis' (direct analysis of their tasks and hours, using 'you' and 'your'), " +
+                          "'suggestions' object containing: {" +
+                          "  'taskManagement' (2-3 personalized points on handling workload), " +
+                          "  'personalWellbeing' (2-3 points addressing user directly), " +
+                          "  'routineOptimization' (2-3 points using 'you' and 'your')" +
+                          "}. " +
+                          "Use direct address (you/your) throughout the analysis. No introductory text before JSON, And no explaination just the json object"
             ));
             
-            messages.add(Map.of(
-                "role", "user",
-                "content", "{\\\"Personality\\\": \\\"Indoor\\\", \\\"TaskAssigned\\\": 3, \\\"HoursSpent\\\": 9, \\\"SubmissionTime\\\": \\\"BeforeTime\\\", \\\"Hobbies\\\": \\\"Chess, Painting, Listening to Music, Dancing\\\"}"
-            ));
+            String userDataJson = objectMapper.writeValueAsString(userData);
+            messages.add(Map.of("role", "user", "content", userDataJson));
             
             requestBody.put("messages", messages);
     
@@ -89,10 +107,19 @@ public class UserService {
                 String.class
             );
             
-            return response.getBody();
+            JsonNode rootNode = objectMapper.readTree(response.getBody());
+            String content = rootNode.path("choices")
+                .path(0)
+                .path("message")
+                .path("content")
+                .asText()
+                .replace("```json\n", "")
+                .replace("\n```", "");
+                
+            return content;
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error: " + e.getMessage();
+            return null;
         }
     }
     
