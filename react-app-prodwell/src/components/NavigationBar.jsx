@@ -75,7 +75,7 @@ export const NavigationBar = () => {
         alt="ProdWell logo"
         style={{ borderRadius: "50%" }} 
     />
-    <span className="ml-2">ProdWell</span>
+    <span className="ml-2 mr-5">ProdWell</span>
 </Navbar.Brand>
     <Navbar.Toggle aria-controls="basic-navbar-nav" />
     <Navbar.Collapse id="basic-navbar-nav">
