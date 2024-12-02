@@ -2,6 +2,7 @@ import React from "react";
 import FeatureCard from "./FeatureCard";
 import yash from "../assets/images/Yash.jpeg";
 import kenil from "../assets/images/Kenil.jpeg"
+import vyshnavi from "../assets/images/Vyshnavi.jpeg"
 
 const ContactDetails = () => (
   <section id="features" className="w-full bg-white py-16 px-8 text-center">
@@ -21,6 +22,7 @@ const ContactDetails = () => (
         description="SJSU ID: 017583878"
       />
       <FeatureCard
+        image = {vyshnavi}
         title="Vyshnavi D P"
         description="SJSU ID: 018178979"
       />
