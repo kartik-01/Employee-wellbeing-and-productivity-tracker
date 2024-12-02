@@ -27,12 +27,17 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # Step 3: Install AWS CLI
-      - name: Install AWS CLI
+      # Step 3: Check if AWS CLI is already installed, if not, install it
+      - name: Install AWS CLI (if not installed)
         run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
+          if ! command -v aws &> /dev/null; then
+            echo "AWS CLI not found, installing..."
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+          else
+            echo "AWS CLI is already installed"
+          fi
 
       # Step 4: Set AWS Credentials from GitHub Secrets
       - name: Configure AWS CLI
