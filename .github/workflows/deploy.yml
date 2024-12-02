@@ -26,6 +26,7 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          maven-version: '3.8.1'
 
       # Step 3: Install Maven
       - name: Install Maven
