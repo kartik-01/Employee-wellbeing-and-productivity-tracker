@@ -1,0 +1,58 @@
+name: Deploy to AWS Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - deployment  # Trigger on commit to the deployment branch
+  pull_request:
+    branches:
+      - deployment  # Trigger on PR to the deployment branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up JDK (if your backend uses Java)
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+
+      # Step 3: Install AWS CLI
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+
+      # Step 4: Set AWS Credentials from GitHub Secrets
+      - name: Configure AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ${{ secrets.AWS_REGION }}
+
+      # Step 5: Create ZIP file of the backend code
+      - name: Create ZIP of backend code
+        run: |
+          zip -r backend.zip ./*
+
+      # Step 6: Upload ZIP to S3 bucket
+      - name: Upload to S3 bucket
+        run: |
+          aws s3 cp backend.zip s3://${{ secrets.S3_BUCKET_NAME }}/backend.zip --no-progress
+
+      # Step 7: Trigger Elastic Beanstalk deployment
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          aws elasticbeanstalk update-environment --application-name ${{ secrets.EB_APPLICATION_NAME }} --environment-name ${{ secrets.EB_ENVIRONMENT_NAME }} --version-label backend-$(date +%Y-%m-%d-%H-%M-%S) --s3-bucket ${{ secrets.S3_BUCKET_NAME }} --s3-key backend.zip
+
+      # Step 8: Clean up (optional, remove any downloaded files)
+      - name: Clean up
+        run: |
+          rm -f backend.zip

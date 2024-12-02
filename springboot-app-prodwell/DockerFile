@@ -11,8 +11,8 @@ COPY target/springboot-app-prodwell-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
 
 # Set environment variables from the .env file
-ENV SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
-ENV SPRING_DATA_MONGODB_DATABASE=${SPRING_DATA_MONGODB_DATABASE}
+ENV SPRING_DATA_MONGODB_URI="mongodb+srv://kartikchindarkar01:muaraK6k5jM8so36@sjsu.zgadi.mongodb.net/?retryWrites=true&w=majority&appName=sjsu"
+ENV SPRING_DATA_MONGODB_DATABASE="prodwellDB"
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
