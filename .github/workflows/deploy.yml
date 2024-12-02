@@ -1,3 +1,41 @@
+on:
+  push:
+    branches:
+      - test/deployment  # Trigger on commit to the deployment branch
+  pull_request:
+    branches:
+      - test/deployment  # Trigger on PR to the deployment branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./springboot-app-prodwell
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Build project
+        run: mvn clean install -DskipTests
+      - name: Deploy to elastic beanstalk please
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: "PW"
+          environment_name: "PW-env"
+          version_label: ${{ github.sha }}
+          region: us-east-2
+          deployment_package: springboot-app-prodwell/target/springboot-app-prodwell-0.0.1-SNAPSHOT.jar
+
+
+
+
 #name: Deploy to AWS Elastic Beanstalk
 #
 #on:
@@ -85,37 +123,4 @@
 ##        run: |
 ##          rm -f springboot-app-prodwell/prodwell-backend.zip
 
-on:
-  push:
-    branches:
-      - test/deployment  # Trigger on commit to the deployment branch
-  pull_request:
-    branches:
-      - test/deployment  # Trigger on PR to the deployment branch
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./springboot-app-prodwell
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-      - name: Build project
-        run: mvn clean install -DskipTests
-      - name: Deploy to elastic beanstalk please
-        uses: einaregilsson/beanstalk-deploy@v22
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: "PW"
-          environment_name: "PW-env"
-          version_label: ${{ github.sha }}
-          region: us-east-2
-          deployment_package: springboot-app-prodwell/target/springboot-app-prodwell-0.0.1-SNAPSHOT.jar
