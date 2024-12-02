@@ -5,11 +5,8 @@ import { loginRequest } from "../authConfig";
 import { FaPlus, FaTrash, FaMagic, FaEdit } from 'react-icons/fa';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Line } from 'react-chartjs-2';
-// import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, LineElement, PointElement } from 'chart.js';
 import AnalysisItem from '../components/AnalysisItem';
-
-// ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement);
 
 ChartJS.register(
   CategoryScale,
@@ -18,9 +15,9 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement, // For Pie chart
-  LineElement, // For Line chart
-  PointElement // For Line chart
+  ArcElement,
+  LineElement, 
+  PointElement 
 );
 
 export const DashboardPage = ({ userId, setUserId }) => {
@@ -603,7 +600,6 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       <p className="ml-7 mr-7">Hello Trump, your stress levels indicate that you are managing a significant workload, especially around the mid-to-end of the month. It's clear that you are diligent and committed to your tasks, but it's important to balance your work and personal life to avoid burnout.</p>
       <div className="">
         <AnalysisItem question="Work Load Analysis" l1="You have multiple tasks assigned with varying deadlines and hours. The task 'DummyTask' and 'TaskDummy' overlap significantly, which adds to your stress. Ensure you prioritize tasks based on their deadlines and allocate your time efficiently to avoid last-minute rushes." />
-        {/* <FAQItem question="Suggestions" answer="" /> */}
         <AnalysisItem question="Suggestions" l1="Prioritize tasks based on their deadlines and complexity to manage your workload better." l2="Break down large tasks into smaller, manageable chunks to reduce stress and increase productivity." l3="Use a calendar or planner to keep track of your tasks and deadlines visually." />
       </div>
       </div>
