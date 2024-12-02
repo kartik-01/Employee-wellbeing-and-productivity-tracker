@@ -1,11 +1,13 @@
 import React from "react";
 import FeatureCard from "./FeatureCard";
 import yash from "../assets/images/Yash.jpeg";
+import kenil from "../assets/images/Kenil.jpeg"
 
 const ContactDetails = () => (
   <section id="features" className="w-full bg-white py-16 px-8 text-center">
     <div className="flex flex-col md:flex-row md:space-x-8 space-y-8 md:space-y-0">
       <FeatureCard
+        image = {kenil}
         title="Kenil Gopani"
         description="SJSU ID: 017992624"
       />
