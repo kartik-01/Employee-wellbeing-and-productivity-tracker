@@ -127,7 +127,8 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       deadlineDate,
       taskStartDate,
       taskEndDate,
-      totalNoHours: parseInt(totalHours, 10),
+      // totalNoHours: parseInt(totalHours, 10),
+      totalNoHours: totalHoursArray,
       userId,
     };
 
@@ -328,10 +329,54 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       scales: {
         y: {
           beginAtZero: true,
-          min: 0,            
+          min: 2, 
+          max: 14,           
         },
       },
   };
+
+  const [totalHoursArray, setTotalHoursArray] = useState([]);
+
+  // Function to calculate the difference in days between taskStartDate and taskEndDate
+  const calculateDateDifference = (start, end) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const timeDifference = endDate - startDate;
+    return (timeDifference / (1000 * 3600 * 24))+1; // Difference in days
+  };
+
+  // Update the totalHoursArray when taskStartDate or taskEndDate changes
+  useEffect(() => {
+    if (taskStartDate && taskEndDate) {
+      const daysDifference = calculateDateDifference(taskStartDate, taskEndDate);
+      // const newTotalHoursArray = Array.from({ length: daysDifference }, () => '');
+      const newTotalHoursArray = Array.from({ length: daysDifference }, () => 0);
+      setTotalHoursArray(newTotalHoursArray);
+    }
+  }, [taskStartDate, taskEndDate]);
+
+  // Handle the change in hours for each day
+  const handleTotalHoursChange = (index, value) => {
+    const updatedHours = [...totalHoursArray];
+    // updatedHours[index] = value;
+    updatedHours[index] = value === '' ? 0 : parseFloat(value);
+    setTotalHoursArray(updatedHours);
+  };
+
+  // const calculateTotalHours = () => {
+  //   return totalHoursArray.reduce((total, hours) => total + hours, 0);
+  // };
+
+  // const preparePayload = () => {
+  //   const totalHours = calculateTotalHours();
+  //   const payload = {
+  //     taskStartDate,
+  //     taskEndDate,
+  //     totalHours, // Sum of all day's hours
+  //     dailyHours: totalHoursArray, // Array of hours for each day
+  //   };
+  //   console.log('Payload:', payload); // You can send this payload to your API
+  // };
 
   return (
     <div className="flex flex-row items-start justify-center min-h-screen p-4 bg-gray-100 gap-4">
@@ -384,14 +429,33 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
               placeholder="Task End Date"
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <label className="font-semibold">Total Number of Hours</label>
+            {/* <label className="font-semibold">Total Number of Hours</label>
             <input
               type="number"
               value={totalHours}
               onChange={(e) => setTotalHours(e.target.value)}
               placeholder="Total Number of Hours"
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            /> */}
+            
+
+      {taskStartDate && taskEndDate && totalHoursArray.length > 0 && (
+        <>
+          {/* <label className="font-semibold">Total Number of Hours</label> */}
+          {totalHoursArray.map((_, index) => (
+            <div key={index} className="mb-2">
+              <label className="block font-medium">Day {index + 1}</label>
+              <input
+                type="number"
+                value={totalHoursArray[index]}
+                onChange={(e) => handleTotalHoursChange(index, e.target.value)}
+                placeholder={`Total Hours for Day ${index + 1}`}
+                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          ))}
+        </>
+      )}
             {errors.totalHours && <p className="text-red-500">{errors.totalHours}</p>}
             <button
               onClick={handleAddOrUpdateTask}
