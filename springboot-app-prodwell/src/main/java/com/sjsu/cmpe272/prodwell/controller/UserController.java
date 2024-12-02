@@ -1,24 +1,23 @@
 package com.sjsu.cmpe272.prodwell.controller;
 
+import com.sjsu.cmpe272.prodwell.entity.User;
+import com.sjsu.cmpe272.prodwell.entity.UserDataDTO;
+import com.sjsu.cmpe272.prodwell.service.UserService;
+import com.sjsu.cmpe272.prodwell.service.UserDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.sjsu.cmpe272.prodwell.entity.User;
-import com.sjsu.cmpe272.prodwell.service.UserService;
+import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
-	
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private UserDataService userDataService;
 
     @PostMapping("/check-and-create")
     public ResponseEntity<User> checkAndCreateUser(@RequestBody User userData) {
@@ -27,6 +26,18 @@ public class UserController {
         System.out.println("Saved user: " + user);
         return ResponseEntity.ok(user);
     }
-	
-}
 
+    @PostMapping("/{oid}/ai-insights")
+    public ResponseEntity<String> getUserCompleteData(@PathVariable String oid) {
+        UserDataDTO userData = userDataService.getUserData(oid);
+        if (userData.getUser() == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        String analysis = userService.analyzeUserStress(userData);
+        if (analysis == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+        return ResponseEntity.ok(analysis);
+    }
+}
