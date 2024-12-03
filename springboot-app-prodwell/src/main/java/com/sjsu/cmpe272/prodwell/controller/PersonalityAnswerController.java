@@ -25,6 +25,20 @@ public class PersonalityAnswerController {
         PersonalityAnswer savedAnswer = service.saveOrUpdateAnswer(personalityAnswer);
         return ResponseEntity.ok(savedAnswer);
     }
+    // Update PersonalityAnswer by userId
+@PutMapping("/{userId}")
+public ResponseEntity<PersonalityAnswer> updateAnswerByUserId(@PathVariable String userId, 
+                                                              @RequestBody PersonalityAnswer updatedAnswer) {
+    // Set the userId in the incoming object to match the path variable for safety
+    updatedAnswer.setUserId(userId);
+    
+    // Call the service method to handle update or save logic
+    PersonalityAnswer savedAnswer = service.saveOrUpdateAnswer(updatedAnswer);
+
+    // Return the updated answer in the response
+    return ResponseEntity.ok(savedAnswer);
+}
+
 
     // Get PersonalityAnswer by userId
     @GetMapping("/{userId}")

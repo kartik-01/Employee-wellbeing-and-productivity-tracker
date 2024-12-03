@@ -8,7 +8,7 @@ import { Chart as ChartJS, CategoryScale, Title, Tooltip, Legend, ArcElement, Li
 import dayjs from 'dayjs';
 import { ClipLoader } from 'react-spinners'; // Import spinner component
 import userService from '../services/userService';
-import { Accordion, Card } from "react-bootstrap";
+import { Accordion } from "react-bootstrap";
 
 ChartJS.register(CategoryScale, Title, Tooltip, Legend, ArcElement, LinearScale, PointElement, LineElement);
 
@@ -96,18 +96,39 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       console.error("User ID is not available. Please ensure you are logged in.");
       return;
     }
+    
     setIsLoading(true);
+    
     try {
       const response = await userService.getUserTasks(userId);
-      setTasks(response.data);
-      updateTaskStatusCounts(response.data);
-    }
-      catch (error) {
+      // Map the response to format the date fields correctly
+      const formattedTasks = response.data.map((task) => {
+        return {
+          ...task,
+          assignedDate: Array.isArray(task.assignedDate)
+            ? dayjs(`${task.assignedDate[0]}-${task.assignedDate[1]}-${task.assignedDate[2]}`).format('YYYY-MM-DD')
+            : task.assignedDate,
+          deadlineDate: Array.isArray(task.deadlineDate)
+            ? dayjs(`${task.deadlineDate[0]}-${task.deadlineDate[1]}-${task.deadlineDate[2]}`).format('YYYY-MM-DD')
+            : task.deadlineDate,
+          taskStartDate: Array.isArray(task.taskStartDate)
+            ? dayjs(`${task.taskStartDate[0]}-${task.taskStartDate[1]}-${task.taskStartDate[2]}`).format('YYYY-MM-DD')
+            : task.taskStartDate,
+          taskEndDate: Array.isArray(task.taskEndDate)
+            ? dayjs(`${task.taskEndDate[0]}-${task.taskEndDate[1]}-${task.taskEndDate[2]}`).format('YYYY-MM-DD')
+            : task.taskEndDate,
+        };
+      });
+  
+      setTasks(formattedTasks);
+      updateTaskStatusCounts(formattedTasks);
+    } catch (error) {
       console.error("Network error while fetching tasks:", error);
-    }finally {
+    } finally {
       setIsLoading(false); // Set loading state to false after fetching
     }
   };
+  
   const loaderStyle = {
     display: 'flex',
     justifyContent: 'center',
