@@ -63,12 +63,11 @@ public class UserDataService {
                     task.getDeadlineDate(),
                     task.getTaskStartDate(),
                     task.getTaskEndDate(),
-                    task.getTotalNoHours()
+                    task.getDailyHours() 
                 ))
                 .collect(Collectors.toList());
             userData.setTasks(taskDataList);
         }
-        
         return userData;
     }
 
