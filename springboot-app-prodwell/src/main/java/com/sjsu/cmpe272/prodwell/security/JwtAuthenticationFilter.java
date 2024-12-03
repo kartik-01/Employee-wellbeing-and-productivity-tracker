@@ -16,16 +16,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
     private final ObjectMapper objectMapper = new ObjectMapper();
     
-    private void validateToken(String token) throws Exception {
-        try {
-            if (!isTokenValid(token)) {
-                throw new Exception("Invalid token");
-            }
-        } catch (Exception e) {
-            throw new Exception("Token validation failed: " + e.getMessage());
-        }
-    }
-
     private boolean isTokenValid(String token) {
         try {
             // Split the token into its parts
@@ -35,14 +25,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return false;
             }
 
-            // Decode and verify payload
+            // Only decode and check the payload (second part)
             String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
             JsonNode claims = objectMapper.readTree(payload);
 
-            // Only check for oid claim
+            // Only check if oid exists
             return claims.has("oid");
             
         } catch (Exception e) {
+            System.out.println("Token validation error: " + e.getMessage());
             return false;
         }
     }
@@ -57,13 +48,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String authHeader = request.getHeader("Authorization");
+        System.out.println("Auth header: " + authHeader); // Add logging
         
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            try {
-                validateToken(token);
+            if (isTokenValid(token)) {
                 filterChain.doFilter(request, response);
-            } catch (Exception e) {
+            } else {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             }
         } else {

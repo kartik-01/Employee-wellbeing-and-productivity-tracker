@@ -3,7 +3,6 @@ package com.sjsu.cmpe272.prodwell.config;
 import com.sjsu.cmpe272.prodwell.security.EncryptionService;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.WritingConverter;
-import org.springframework.data.convert.ReadingConverter;
 
 @WritingConverter
 public class EncryptedDoubleWritingConverter implements Converter<Double, String> {
