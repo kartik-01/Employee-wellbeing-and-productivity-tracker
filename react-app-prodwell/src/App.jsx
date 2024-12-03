@@ -15,6 +15,8 @@ import { DashboardPage } from './pages/Dashboard';
 import './styles/App.css';
 import { ProfilePage } from './pages/ProfilePage';
 import { AboutUs } from './pages/AboutUs';
+import "bootstrap/dist/css/bootstrap.min.css";
+
 
 const Pages = ({ userId, setUserId }) => {
     const { instance } = useMsal();
