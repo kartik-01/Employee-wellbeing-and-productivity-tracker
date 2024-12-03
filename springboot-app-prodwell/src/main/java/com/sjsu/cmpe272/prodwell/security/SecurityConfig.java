@@ -25,7 +25,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/users/check-and-create").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/personalityQuestions/**").permitAll()
-                .requestMatchers("/api/users/{oid}/ai-insights").permitAll()  // Temporarily permit for testing
+                .requestMatchers("/personalityAnswers/**").permitAll()
+                .requestMatchers("/tasks/user/**").permitAll()
+                .requestMatchers("/tasks/**").permitAll()
+                .requestMatchers("/api/users/{oid}/ai-insights").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

@@ -2,6 +2,8 @@ package com.sjsu.cmpe272.prodwell.entity;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -31,7 +33,7 @@ public class UserDataDTO {
         private LocalDate deadlineDate;
         private LocalDate taskStartDate;
         private LocalDate taskEndDate;
-        private int totalNoHours;
+        private List<Map<String, Integer>>  totalNoHours;
     }
 
     // Custom constructor for partial data
