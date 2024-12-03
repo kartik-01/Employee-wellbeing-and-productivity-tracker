@@ -36,6 +36,8 @@ public class UserService {
     
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private AIInsightsService aiInsightsService;
 
     public User checkAndCreateUser(User userData) {
         return userRepository.findByOid(userData.getOid())
@@ -114,7 +116,11 @@ public class UserService {
                 .path("content")
                 .asText()
                 .replace("```json\n", "")
-                .replace("\n```", "");
+                .replace("\n```", "")
+                .trim();
+            
+                 // Save the AI insights
+                aiInsightsService.saveInsight(userData.getUser().getOid(), content);
                 
             return content;
         } catch (Exception e) {

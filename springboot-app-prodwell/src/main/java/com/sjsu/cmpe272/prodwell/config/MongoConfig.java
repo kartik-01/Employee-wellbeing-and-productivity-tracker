@@ -21,6 +21,10 @@ public class MongoConfig {
         List<Converter<?, ?>> converters = new ArrayList<>();
         converters.add(new EncryptedAnswerWritingConverter(encryptionService));
         converters.add(new EncryptedAnswerReadingConverter(encryptionService));
+        converters.add(new EncryptedAIInsightWritingConverter(encryptionService));
+        converters.add(new EncryptedAIInsightReadingConverter(encryptionService));
+        converters.add(new EncryptedDoubleWritingConverter(encryptionService));
+        converters.add(new EncryptedDoubleReadingConverter(encryptionService));
         return new MongoCustomConversions(converters);
     }
 }
