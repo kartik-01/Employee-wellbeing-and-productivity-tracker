@@ -7,6 +7,8 @@ import { Pie, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, Title, Tooltip, Legend, ArcElement, LinearScale, PointElement, LineElement } from 'chart.js';
 import dayjs from 'dayjs';
 import { ClipLoader } from 'react-spinners'; // Import spinner component
+import userService from '../services/userService';
+import { Accordion, Card } from "react-bootstrap";
 
 ChartJS.register(CategoryScale, Title, Tooltip, Legend, ArcElement, LinearScale, PointElement, LineElement);
 
@@ -96,15 +98,11 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
     }
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:8080/tasks/user/${userId}`);
-      if (!response.ok) {
-        console.error("Failed to fetch tasks:", response.statusText);
-        return;
-      }
-      const data = await response.json();
-      setTasks(data);
-      updateTaskStatusCounts(data);
-    } catch (error) {
+      const response = await userService.getUserTasks(userId);
+      setTasks(response.data);
+      updateTaskStatusCounts(response.data);
+    }
+      catch (error) {
       console.error("Network error while fetching tasks:", error);
     }finally {
       setIsLoading(false); // Set loading state to false after fetching
@@ -196,22 +194,11 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
 
     try {
       setIsLoading(true);
-      const url = editMode ? `http://localhost:8080/tasks/${selectedTaskId}` : "http://localhost:8080/tasks/";
-      const method = editMode ? "PUT" : "POST";
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(taskPayload),
-      });
-
-      if (!response.ok) {
-        console.error(`Failed to ${editMode ? "update" : "add"} task:`, response.statusText);
-        return;
-      }
-
+      if (editMode) {
+        await userService.updateTask(selectedTaskId, taskPayload);
+    } else {
+        await userService.addTask(taskPayload);
+    }
       await fetchTasks();
 
       setTaskName("");
@@ -229,17 +216,32 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       console.error(`Network error while ${editMode ? "updating" : "adding"} task:`, error);
     }
   };
-
+  const accordData = {
+    overview:
+      "Hello Trump, your stress levels indicate that you are managing a significant workload, especially around the mid-to-end of the month. It's clear that you are diligent and committed to your tasks, but it's important to balance your work and personal life to avoid burnout.",
+    workloadAnalysis:
+      "You have multiple tasks assigned with varying deadlines and hours. The task 'DummyTask' and 'TaskDummy' overlap significantly, which adds to your stress. Ensure you prioritize tasks based on their deadlines and allocate your time efficiently to avoid last-minute rushes.",
+    suggestions: {
+      "Task Management": [
+        "Prioritize tasks based on their deadlines and complexity to manage your workload better.",
+        "Break down large tasks into smaller, manageable chunks to reduce stress and increase productivity.",
+        "Use a calendar or planner to keep track of your tasks and deadlines visually.",
+      ],
+      "Personal Wellbeing": [
+        "Make sure to take regular breaks throughout the day to reduce stress and maintain focus.",
+        "Engage in activities that help you relax, such as meditation, reading, or a short walk.",
+        "Ensure you get adequate sleep each night to help your body and mind recover from the day's stress.",
+      ],
+      "Routine Optimization": [
+        "Optimize your daily routine to include time for both work and personal activities.",
+        "Consider delegating tasks if possible to reduce your workload.",
+        "Use technology to your advantage by setting reminders and using productivity apps to stay organized.",
+      ],
+    },
+  };
   const handleDeleteTask = async (taskId) => {
     try {
-      const response = await fetch(`http://localhost:8080/tasks/${taskId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        console.error("Failed to delete task:", response.statusText);
-        return;
-      }
+      await userService.deleteTask(taskId);
 
       await fetchTasks();
     } catch (error) {
@@ -395,9 +397,8 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       },
     },
   };
-  return (
-
-    
+  return ( 
+    <>  
     <div className="flex flex-col lg:flex-row items-start justify-center min-h-screen p-4 bg-gray-100 gap-4">
       {isLoading ? (
       <div style={loaderStyle}>
@@ -651,5 +652,56 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
         </>
       )}
     </div>
+    <div className="flex flex-row items-start justify-center p-1 bg-gray-100 gap-2">
+        <div className="w-100 ml-4 mr-4 mb-2 bg-gray-100 rounded-lg shadow-md flex flex-col overflow-auto">
+          {/* <h2 className="text-3xl font-semibold text-gray-800 text-center mb-8 mt-2">Overview</h2>
+          <p className="ml-7 mr-7">Hello Trump, your stress levels indicate that you are managing a significant workload, especially around the mid-to-end of the month. It's clear that you are diligent and committed to your tasks, but it's important to balance your work and personal life to avoid burnout.</p> */}
+          <Accordion>
+          <Accordion.Item eventKey="0">
+              <Accordion.Header>
+              <div className="font-semibold text-gray-800 text-center w-full m-2">
+                Overview
+              </div>
+              </Accordion.Header>
+              <Accordion.Body>{accordData.overview}</Accordion.Body>
+            </Accordion.Item>
+            {/* Workload Analysis */}
+            <Accordion.Item eventKey="1">
+              <Accordion.Header>
+              <div className="font-semibold text-gray-800 text-center w-full m-2">
+                Workload Analysis
+              </div>
+              </Accordion.Header>
+              <Accordion.Body>{accordData.workloadAnalysis}</Accordion.Body>
+            </Accordion.Item>
+            {/* className="font-semibold text-gray-800 cursor-pointer text-center" */}
+            {/* Suggestions */}
+            <Accordion.Item eventKey="2">
+            <Accordion.Header>
+              <div className="font-semibold text-gray-800 text-center w-full m-2">
+                Suggestions
+              </div>
+            </Accordion.Header>
+              <Accordion.Body>
+                <Accordion>
+                  {Object.entries(accordData.suggestions).map(([key, values], index) => (
+                    <Accordion.Item eventKey={index.toString()} key={key}>
+                      <Accordion.Header>{key.replace(/([A-Z])/g, " $1")}</Accordion.Header>
+                      <Accordion.Body>
+                        <ul className="list-disc pl-5">
+                          {values.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </Accordion.Body>
+                    </Accordion.Item>
+                  ))}
+                </Accordion>
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        </div>
+      </div>
+      </> 
   );
 };
