@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1733256977910" clover="3.2.0">
-  <project timestamp="1733256977910" name="All files">
+<coverage generated="1733263412272" clover="3.2.0">
+  <project timestamp="1733263412272" name="All files">
     <metrics statements="23" coveredstatements="23" conditionals="0" coveredconditionals="0" methods="12" coveredmethods="12" elements="35" coveredelements="35" complexity="0" loc="23" ncloc="23" packages="1" files="12" classes="12"/>
     <file name="AboutSection.jsx" path="/Users/spartan/Desktop/ESP_272/Final_Project/Employee-wellbeing-and-productivity-tracker/react-app-prodwell/src/components/AboutSection.jsx">
       <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
