@@ -18,8 +18,6 @@ public class User {
     private String given_name;
     private String family_name;
     private String jobTitle;
-    private String country;
-    private String city;
 
     // Getters
     public String getId() {
@@ -42,14 +40,6 @@ public class User {
         return this.jobTitle;
     }
 
-    public String getCountry() {
-        return this.country;
-    }
-
-    public String getCity() {
-        return this.city;
-    }
-
     // Setters
     public void setId(String id) {
         this.id = id;
@@ -69,13 +59,5 @@ public class User {
 
     public void setJobTitle(String jobTitle) {
         this.jobTitle = jobTitle;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
     }
 }

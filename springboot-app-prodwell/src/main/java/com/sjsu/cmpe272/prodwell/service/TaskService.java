@@ -3,10 +3,8 @@ package com.sjsu.cmpe272.prodwell.service;
 import com.sjsu.cmpe272.prodwell.entity.Task;
 import com.sjsu.cmpe272.prodwell.repository.TaskRepository;
 import com.sjsu.cmpe272.prodwell.repository.UserRepository;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
