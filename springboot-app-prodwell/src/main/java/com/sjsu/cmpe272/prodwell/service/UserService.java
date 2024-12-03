@@ -66,7 +66,7 @@ public class UserService {
             headers.setBearerAuth(PPLX_TOKEN);
     
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("model", "llama-3.1-sonar-small-128k-online");
+            requestBody.put("model", "llama-3.1-sonar-large-128k-online");
             requestBody.put("temperature", 0.3);  // Lower temperature for more consistent outputs
             
             List<Map<String, String>> messages = new ArrayList<>();
@@ -88,9 +88,9 @@ public class UserService {
                           "'suggestions' object containing: {" +
                           "  'taskManagement' (2-3 personalized points on handling workload), " +
                           "  'personalWellbeing' (2-3 points addressing user directly), " +
-                          "  'routineOptimization' (2-3 points using 'you' and 'your')" +
+                          "  'counselling' ( Suggest this if average stress level is above 8, otherwise this field is not needed. 2-3 points using 'you' and 'your')" +
                           "}. " +
-                          "Use direct address (you/your) throughout the analysis. No introductory text before JSON, And no explaination just the json object"
+                          "Use direct address (you/your) throughout the analysis. NO EXPLANATION IS NEEDED, ONLY JSON OBJECT"
             ));
             
             String userDataJson = objectMapper.writeValueAsString(userData);
