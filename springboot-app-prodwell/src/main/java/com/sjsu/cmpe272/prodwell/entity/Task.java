@@ -9,6 +9,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Document(collection = "tasks")
@@ -27,10 +29,9 @@ public class Task {
     private LocalDate deadlineDate;
     private LocalDate taskStartDate;
     private LocalDate taskEndDate;
-    private int totalNoHours;
-
+    private List<Map<String, Integer>> dailyHours;
     public void generateTaskId() {
-        if (this.taskId == null) {
+        if (this.taskId == null || this.taskId.isEmpty()) {
             this.taskId = UUID.randomUUID().toString();
         }
     }
