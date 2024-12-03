@@ -5,9 +5,11 @@ import com.sjsu.cmpe272.prodwell.service.TaskService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -40,15 +42,19 @@ public class TaskController {
 
     // Endpoint to get a task by its ID
     @GetMapping("/{taskId}")
-    public Task getTaskByTaskId(@PathVariable String taskId) {
+    public Optional<Task> getTaskByTaskId(@PathVariable String taskId) {
         return taskService.getTaskByTaskId(taskId);
     }
 
-    // Endpoint to update an existing task
+      // Endpoint to update an existing task
     @PutMapping("/{taskId}")
-    public Task updateTask(@PathVariable String taskId, @RequestBody Task task) {
-        task.setTaskId(taskId);
-        return taskService.updateTask(task);
+    public ResponseEntity<Task> updateTask(@PathVariable String taskId, @RequestBody Task task) {
+        task.setTaskId(taskId);  // Ensure taskId matches the path variable
+        Task updatedTask = taskService.updateTask(task);
+        if (updatedTask == null) {
+            return ResponseEntity.notFound().build();  // Return 404 if task not found
+        }
+        return ResponseEntity.ok(updatedTask);
     }
 
     // Endpoint to delete a task by its ID
