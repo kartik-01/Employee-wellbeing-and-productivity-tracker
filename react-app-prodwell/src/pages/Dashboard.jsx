@@ -4,6 +4,7 @@ import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
 import { FaPlus, FaTrash, FaMagic, FaEdit } from 'react-icons/fa';
 import { Bar, Pie } from 'react-chartjs-2';
+import userService from '../services/userService';
 import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement);
@@ -57,23 +58,18 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
 
   const fetchTasks = async () => {
     if (!userId) {
-      console.error("User ID is not available. Please ensure you are logged in.");
-      return;
+        console.error("User ID is not available. Please ensure you are logged in.");
+        return;
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/tasks/user/${userId}`);
-      if (!response.ok) {
-        console.error("Failed to fetch tasks:", response.statusText);
-        return;
-      }
-      const data = await response.json();
-      setTasks(data);
-      updateTaskStatusCounts(data);
+        const response = await userService.getUserTasks(userId);
+        setTasks(response.data);
+        updateTaskStatusCounts(response.data);
     } catch (error) {
-      console.error("Network error while fetching tasks:", error);
+        console.error("Network error while fetching tasks:", error);
     }
-  };
+};
 
   const handleAddOrUpdateTask = async () => {
     const validationErrors = {};
@@ -117,25 +113,15 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
     };
 
     try {
-      const url = editMode ? `http://localhost:8080/tasks/${selectedTaskId}` : "http://localhost:8080/tasks/";
-      const method = editMode ? "PUT" : "POST";
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(taskPayload),
-      });
-
-      if (!response.ok) {
-        console.error(`Failed to ${editMode ? "update" : "add"} task:`, response.statusText);
-        return;
+      if (editMode) {
+          await userService.updateTask(selectedTaskId, taskPayload);
+      } else {
+          await userService.addTask(taskPayload);
       }
-
+  
       // Fetch tasks again to update the table
       await fetchTasks();
-
+  
       // Clear form and reset edit mode
       setTaskName("");
       setAssignedDate("");
@@ -146,7 +132,7 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       setErrors({});
       setEditMode(false);
       setSelectedTaskId(null);
-    } catch (error) {
+    }catch (error) {
       console.error(`Network error while ${editMode ? "updating" : "adding"} task:`, error);
     }
   };
@@ -191,19 +177,11 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
 
   const handleDeleteTask = async (taskId) => {
     try {
-      const response = await fetch(`http://localhost:8080/tasks/${taskId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        console.error("Failed to delete task:", response.statusText);
-        return;
-      }
-
+      await userService.deleteTask(taskId);
       // Fetch tasks again to update the table after deletion
       await fetchTasks();
     } catch (error) {
-      console.error("Network error while deleting task:", error);
+      console.error("Error deleting task:", error);
     }
   };
 

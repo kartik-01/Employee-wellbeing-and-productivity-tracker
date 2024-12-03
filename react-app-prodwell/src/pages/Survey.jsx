@@ -5,6 +5,7 @@ import { MsalAuthenticationTemplate } from '@azure/msal-react';
 import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
 import { useNavigate } from 'react-router-dom';
+import userService from '../services/userService';
 
 export const SurveyPage = ({ userId, setUserId }) => {
   const authRequest = {
@@ -31,7 +32,7 @@ const SurveyPageContent = ({ userId, setUserId }) => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/personalityQuestions/');
+        const response = await userService.getPersonalityQuestions();
         const validQuestions = response.data.filter(
           (item) => item.question && item.type && item.options
         );
@@ -191,12 +192,12 @@ const SurveyPageContent = ({ userId, setUserId }) => {
     };
   
     try {
-      await axios.post('http://localhost:8080/personalityAnswers/', payload);
+      await userService.submitPersonalityAnswers(payload);
       console.log("Survey submitted successfully.");
       navigate('/dashboard');
-    } catch (error) {
+  } catch (error) {
       console.error('Error submitting survey:', error);
-    }
+  }
   };
   
 
