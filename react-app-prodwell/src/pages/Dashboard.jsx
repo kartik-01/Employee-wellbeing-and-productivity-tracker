@@ -490,7 +490,7 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
               </button>
               <button
                 onClick={handleMagicClick}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-all mt-4"
+                className="flex items-center gap-2 px-4 py-2 bg-[#6200ea] text-white rounded hover:bg-purple-600 transition-all mt-4"
               >
                 <FaMagic /> Show Graphs
               </button>
@@ -603,7 +603,7 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
             <center>
               <button
                 onClick={handleStressClick}
-                className="flex items-center gap-1 px-2 py-2 w-32 bg-purple-500 text-white rounded hover:bg-purple-600 transition-all mt-20"
+                className="flex items-center gap-1 px-2 py-2 w-32 bg-[#6200ea] text-white rounded hover:bg-purple-600 transition-all mt-20"
               >
                 <FaMagic /> Show Stress
               </button>
