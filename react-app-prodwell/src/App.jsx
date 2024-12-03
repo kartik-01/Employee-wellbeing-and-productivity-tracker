@@ -52,15 +52,15 @@ const Pages = ({ userId, setUserId }) => {
                         console.error('Error checking/creating user:', error);
                     });
 
-                if (event.payload.idTokenClaims.given_name && event.payload.idTokenClaims.given_name.trim() === "Kartik Nitisn") {
-                    if (location.pathname !== "/survey") {
-                        navigate("/survey");
-                    }
-                } else {
-                    if (location.pathname !== "/dashboard") {
-                        navigate("/dashboard");
-                    }
-                }
+                // if (event.payload.idTokenClaims.given_name && event.payload.idTokenClaims.given_name.trim() === "Kartik Nitisn") {
+                //     if (location.pathname !== "/survey") {
+                //         navigate("/survey");
+                //     }
+                // } else {
+                //     if (location.pathname !== "/dashboard") {
+                //         navigate("/dashboard");
+                //     }
+                // }
 
                 setInitialRedirectDone(true);
 
