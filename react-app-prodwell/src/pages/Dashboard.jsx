@@ -20,8 +20,6 @@ export const DashboardPage = ({ userId, setUserId }) => {
   return (
     <MsalAuthenticationTemplate
       interactionType={InteractionType.Redirect}
-    <MsalAuthenticationTemplate
-      interactionType={InteractionType.Redirect}
       authenticationRequest={authRequest}
     >
       <DashboardPageContent userId={userId} setUserId={setUserId} />
@@ -578,13 +576,7 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
                     <th className="px-4 py-2 border">Actions</th>
                   </tr>
                 </thead>
-                <tbody
-                  style={{
-                    maxHeight: '10rem',
-                    overflowY: 'auto',
-                    display: 'block',
-                  }}
-                >
+                <tbody>
                   {tasks.map((task, index) => (
                     <tr
                       key={index}
@@ -604,10 +596,10 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
                           ? 'Completed On Time'
                           : 'Completed Late'}
                       </td>
-                      <td className="px-4 py-2 border items-center justify-center gap-2">
+                      <td className="px-4 py-2 border flex items-center justify-center gap-2">
                         <button
                           onClick={() => handleEditTask(task)}
-                          className="text-blue-500 hover:text-blue-700 transition-all mr-5"
+                          className="text-blue-500 hover:text-blue-700 transition-all"
                         >
                           <FaEdit />
                         </button>
@@ -623,10 +615,8 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
-
-
+          </div>
+        )}
       </div>
   
       {/* Right Card */}
