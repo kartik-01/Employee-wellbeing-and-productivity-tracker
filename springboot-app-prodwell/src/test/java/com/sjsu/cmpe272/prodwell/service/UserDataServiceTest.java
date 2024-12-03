@@ -80,4 +80,38 @@ class UserDataServiceTest {
         List<UserDataDTO.PersonalityData> results = service.getUserPersonalityAnswers("test-oid");
         assertTrue(results.isEmpty());
     }
+
+    @Test
+    void shouldGetUserDataWithPersonalityAnswers() {
+        String oid = "test-oid";
+        User user = new User();
+        PersonalityAnswer answer = new PersonalityAnswer();
+        answer.setAnswers(Arrays.asList(new PersonalityAnswer.QuestionAnswer("Q1", Arrays.asList("A1"))));
+
+        when(userRepository.findByOid(oid)).thenReturn(Optional.of(user));
+        when(personalityAnswerRepository.findById(oid)).thenReturn(Optional.of(answer));
+        when(personalityQuestionRepository.findByQuestionId("Q1"))
+                .thenReturn(Optional.of(new PersonalityQuestion()));
+
+        UserDataDTO result = service.getUserData(oid);
+        assertNotNull(result.getPersonalityData());
+        assertFalse(result.getPersonalityData().isEmpty());
+    }
+
+    @Test
+    void shouldGetUserPersonalityAnswersWithQuestions() {
+        String oid = "test-oid";
+        PersonalityAnswer answer = new PersonalityAnswer();
+        answer.setAnswers(Arrays.asList(new PersonalityAnswer.QuestionAnswer("Q1", Arrays.asList("A1"))));
+
+        when(personalityAnswerRepository.findById(oid)).thenReturn(Optional.of(answer));
+        when(personalityQuestionRepository.findByQuestionId("Q1"))
+                .thenReturn(Optional.of(new PersonalityQuestion()));
+
+        List<UserDataDTO.PersonalityData> result = service.getUserPersonalityAnswers(oid);
+        assertFalse(result.isEmpty());
+    }
+
+
+
 }

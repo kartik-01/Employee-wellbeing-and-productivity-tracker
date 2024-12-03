@@ -1,5 +1,8 @@
 package com.sjsu.cmpe272.prodwell.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sjsu.cmpe272.prodwell.entity.AIInsights;
 import com.sjsu.cmpe272.prodwell.entity.User;
 import com.sjsu.cmpe272.prodwell.entity.UserDataDTO;
 import com.sjsu.cmpe272.prodwell.repository.UserRepository;
@@ -8,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,6 +39,11 @@ class UserServiceTest {
 
     @InjectMocks
     private UserService service;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
+    private static final String PPLX_API_URL = "https://api.perplexity.ai/chat/completions";
 
     @Test
     void shouldCreateNewUser() {
@@ -62,4 +72,90 @@ class UserServiceTest {
         assertEquals("John", result.getGiven_name());
         verify(userRepository, never()).save(any(User.class));
     }
+
+    @Test
+    void shouldGetUserCompleteData() {
+        String oid = "test-oid";
+        UserDataDTO userData = new UserDataDTO();
+        userData.setUser(new User());
+
+        when(userDataService.getUserData(oid)).thenReturn(userData);
+
+        UserDataDTO result = service.getUserCompleteData(oid);
+        assertNotNull(result);
+    }
+
+    @Test
+    void shouldReturnNullForInvalidUserData() {
+        String oid = "invalid-oid";
+        UserDataDTO emptyData = new UserDataDTO();
+
+        when(userDataService.getUserData(oid)).thenReturn(emptyData);
+
+        UserDataDTO result = service.getUserCompleteData(oid);
+        assertNull(result);
+    }
+
+    @Test
+    void shouldAnalyzeUserStress() throws Exception {
+        // Setup test data
+        UserDataDTO userData = new UserDataDTO();
+        User user = new User();
+        user.setOid("test-oid");
+        userData.setUser(user);
+
+        // Create properly formatted mock response
+        String mockAIResponse = "{\"choices\":[{\"message\":{\"content\":" +
+                "{\"dailyStressLevels\":[],\"averageStressLevel\":5.0,\"analysis\":{" +
+                "\"overview\":\"test overview\"," +
+                "\"workloadAnalysis\":\"test analysis\"," +
+                "\"suggestions\":{" +
+                "\"taskManagement\":[\"test suggestion\"]," +
+                "\"personalWellbeing\":[\"test wellbeing\"]" +
+                "}}}}}]}";
+
+        // Mock ObjectMapper behavior
+        JsonNode mockRootNode = new ObjectMapper().readTree(mockAIResponse);
+        when(objectMapper.writeValueAsString(any(UserDataDTO.class))).thenReturn("{}");
+        when(objectMapper.readTree(anyString())).thenReturn(mockRootNode);
+
+        // Mock REST response
+        ResponseEntity<String> mockResponse = ResponseEntity.ok(mockAIResponse);
+        when(restTemplate.exchange(
+                eq(PPLX_API_URL),
+                eq(HttpMethod.POST),
+                any(HttpEntity.class),
+                eq(String.class)
+        )).thenReturn(mockResponse);
+
+        // Mock AIInsights save
+        AIInsights mockInsight = new AIInsights();
+        when(aiInsightsService.saveInsight(anyString(), anyString())).thenReturn(mockInsight);
+
+        // Execute and verify
+        String result = service.analyzeUserStress(userData);
+        assertNotNull(result);
+        verify(aiInsightsService).saveInsight(eq("test-oid"), anyString());
+        verify(restTemplate).exchange(
+                eq(PPLX_API_URL),
+                eq(HttpMethod.POST),
+                any(HttpEntity.class),
+                eq(String.class)
+        );
+    }
+
+    @Test
+    void shouldHandleExceptionInAnalyzeUserStress() throws Exception {
+        UserDataDTO userData = new UserDataDTO();
+        User user = new User();
+        user.setOid("test-oid");
+        userData.setUser(user);
+
+        when(objectMapper.writeValueAsString(any(UserDataDTO.class)))
+                .thenThrow(new RuntimeException("Test exception"));
+
+        String result = service.analyzeUserStress(userData);
+        assertNull(result);
+    }
+
 }
