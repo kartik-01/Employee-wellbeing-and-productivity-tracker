@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.sjsu.cmpe272.prodwell.entity.PersonalityQuestion;
 import com.sjsu.cmpe272.prodwell.service.PersonalityQuestionService;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "${cors.allowed-origins}")
 @RestController
 @RequestMapping("/personalityQuestions")
 public class PersonalityQuestionController {
