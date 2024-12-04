@@ -47,9 +47,12 @@ public class UserService {
     private User createNewUser(User userData) {
         User newUser = new User();
         newUser.setOid(userData.getOid());
+        newUser.setEmail(userData.getEmail());
         newUser.setGiven_name(userData.getGiven_name());
         newUser.setFamily_name(userData.getFamily_name());
-        newUser.setJobTitle(userData.getJobTitle());
+        newUser.setJobRole(userData.getJobRole());
+        newUser.setJobLevel(userData.getJobLevel());
+        newUser.setProjectCode(userData.getProjectCode());
         return userRepository.save(newUser);
     }
 
