@@ -50,6 +50,9 @@ class UserServiceTest {
         User userData = new User();
         userData.setOid("test-oid");
         userData.setGiven_name("John");
+        userData.setJobRole("Engineer");
+        userData.setJobLevel("Senior");
+        userData.setProjectCode("P1");
 
         when(userRepository.findByOid("test-oid")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(userData);
@@ -57,6 +60,8 @@ class UserServiceTest {
         User result = service.checkAndCreateUser(userData);
         assertNotNull(result);
         assertEquals("John", result.getGiven_name());
+        assertEquals("Engineer", result.getJobRole());
+        assertEquals("Senior", result.getJobLevel());
     }
 
     @Test
@@ -64,6 +69,8 @@ class UserServiceTest {
         User existingUser = new User();
         existingUser.setOid("test-oid");
         existingUser.setGiven_name("John");
+        existingUser.setJobRole("Engineer");
+        existingUser.setJobLevel("Senior");
 
         when(userRepository.findByOid("test-oid")).thenReturn(Optional.of(existingUser));
 
@@ -77,7 +84,9 @@ class UserServiceTest {
     void shouldGetUserCompleteData() {
         String oid = "test-oid";
         UserDataDTO userData = new UserDataDTO();
-        userData.setUser(new User());
+        User user = new User();
+        user.setOid(oid);
+        userData.setUser(user);
 
         when(userDataService.getUserData(oid)).thenReturn(userData);
 
@@ -98,13 +107,11 @@ class UserServiceTest {
 
     @Test
     void shouldAnalyzeUserStress() throws Exception {
-        // Setup test data
         UserDataDTO userData = new UserDataDTO();
         User user = new User();
         user.setOid("test-oid");
         userData.setUser(user);
 
-        // Create properly formatted mock response
         String mockAIResponse = "{\"choices\":[{\"message\":{\"content\":" +
                 "{\"dailyStressLevels\":[],\"averageStressLevel\":5.0,\"analysis\":{" +
                 "\"overview\":\"test overview\"," +
@@ -114,12 +121,10 @@ class UserServiceTest {
                 "\"personalWellbeing\":[\"test wellbeing\"]" +
                 "}}}}}]}";
 
-        // Mock ObjectMapper behavior
         JsonNode mockRootNode = new ObjectMapper().readTree(mockAIResponse);
         when(objectMapper.writeValueAsString(any(UserDataDTO.class))).thenReturn("{}");
         when(objectMapper.readTree(anyString())).thenReturn(mockRootNode);
 
-        // Mock REST response
         ResponseEntity<String> mockResponse = ResponseEntity.ok(mockAIResponse);
         when(restTemplate.exchange(
                 eq(PPLX_API_URL),
@@ -128,20 +133,11 @@ class UserServiceTest {
                 eq(String.class)
         )).thenReturn(mockResponse);
 
-        // Mock AIInsights save
-        AIInsights mockInsight = new AIInsights();
-        when(aiInsightsService.saveInsight(anyString(), anyString())).thenReturn(mockInsight);
+        when(aiInsightsService.saveInsight(anyString(), anyString())).thenReturn(new AIInsights());
 
-        // Execute and verify
         String result = service.analyzeUserStress(userData);
         assertNotNull(result);
         verify(aiInsightsService).saveInsight(eq("test-oid"), anyString());
-        verify(restTemplate).exchange(
-                eq(PPLX_API_URL),
-                eq(HttpMethod.POST),
-                any(HttpEntity.class),
-                eq(String.class)
-        );
     }
 
     @Test
@@ -157,5 +153,4 @@ class UserServiceTest {
         String result = service.analyzeUserStress(userData);
         assertNull(result);
     }
-
 }

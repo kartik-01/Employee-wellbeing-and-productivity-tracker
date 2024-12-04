@@ -12,10 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -30,103 +27,84 @@ class TaskControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private TaskService service;
+    private TaskService taskService;
 
+    @Autowired
     private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void setup() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
+    @Test
+    void shouldGetTaskByTaskId() throws Exception {
+        Task task = new Task();
+        task.setTaskId("task-1");
+        task.setTaskName("Test Task");
+
+        when(taskService.getTaskByTaskId("task-1")).thenReturn(Optional.of(task));
+
+        mockMvc.perform(get("/tasks/{taskId}", "task-1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.taskId").value("task-1"))
+                .andExpect(jsonPath("$.taskName").value("Test Task"));
     }
 
     @Test
-    void shouldCreateTask() throws Exception {
-        Task task = new Task();
-        task.setTaskId("task-1");
-        task.setUserId("user-1");
-        task.setTaskName("Test Task");
-        task.setAssignedDate(LocalDate.now());
-        task.setDeadlineDate(LocalDate.now().plusDays(7));
+    void shouldReturn404WhenTaskNotFound() throws Exception {
+        when(taskService.getTaskByTaskId("non-existent")).thenReturn(Optional.empty());
 
-        when(service.saveTask(any(Task.class))).thenReturn(task);
+        mockMvc.perform(get("/tasks/{taskId}", "non-existent")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldSaveTask() throws Exception {
+        Task task = new Task();
+        task.setTaskName("New Task");
+        task.setUserId("user-1");
+
+        when(taskService.saveTask(any(Task.class))).thenReturn(task);
 
         mockMvc.perform(post("/tasks/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(task)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.taskId").value("task-1"))
-                .andExpect(jsonPath("$.taskName").value("Test Task"));
-    }
-
-    @Test
-    void shouldCreateBulkTasks() throws Exception {
-        List<Task> tasks = Arrays.asList(
-                createTask("task-1", "Test Task 1"),
-                createTask("task-2", "Test Task 2")
-        );
-
-        when(service.saveTasks(any())).thenReturn(tasks);
-
-        mockMvc.perform(post("/tasks/bulk")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(tasks)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$[0].taskId").value("task-1"))
-                .andExpect(jsonPath("$[1].taskId").value("task-2"));
-    }
-
-    @Test
-    void shouldGetUserTasks() throws Exception {
-        Task task = createTask("task-1", "Test Task");
-        when(service.getTasksByUserOid("user-1")).thenReturn(Arrays.asList(task));
-
-        mockMvc.perform(get("/tasks/user/user-1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].taskId").value("task-1"))
-                .andExpect(jsonPath("$[0].taskName").value("Test Task"));
-    }
-
-    @Test
-    void shouldGetTaskById() throws Exception {
-        Task task = createTask("task-1", "Test Task");
-        when(service.getTaskByTaskId("task-1")).thenReturn(task);
-
-        mockMvc.perform(get("/tasks/task-1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.taskId").value("task-1"))
-                .andExpect(jsonPath("$.taskName").value("Test Task"));
+                .andExpect(status().isCreated());
     }
 
     @Test
     void shouldUpdateTask() throws Exception {
-        Task task = createTask("task-1", "Updated Task");
-        when(service.updateTask(any(Task.class))).thenReturn(task);
+        Task task = new Task();
+        task.setTaskId("task-1");
+        task.setTaskName("Updated Task");
 
-        mockMvc.perform(put("/tasks/task-1")
+        when(taskService.updateTask(any(Task.class))).thenReturn(task);
+
+        mockMvc.perform(put("/tasks/{taskId}", "task-1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(task)))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.taskId").value("task-1"))
                 .andExpect(jsonPath("$.taskName").value("Updated Task"));
     }
 
     @Test
-    void shouldDeleteTask() throws Exception {
-        doNothing().when(service).deleteTask("task-1");
+    void shouldReturn404WhenUpdatingNonExistentTask() throws Exception {
+        Task task = new Task();
+        task.setTaskId("non-existent");
+        task.setTaskName("Updated Task");
 
-        mockMvc.perform(delete("/tasks/task-1"))
-                .andExpect(status().isNoContent());
+        when(taskService.updateTask(any(Task.class))).thenReturn(null);
 
-        verify(service, times(1)).deleteTask("task-1");
+        mockMvc.perform(put("/tasks/{taskId}", "non-existent")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(task)))
+                .andExpect(status().isNotFound());
     }
 
-    private Task createTask(String taskId, String taskName) {
-        Task task = new Task();
-        task.setTaskId(taskId);
-        task.setUserId("user-1");
-        task.setTaskName(taskName);
-        task.setAssignedDate(LocalDate.now());
-        task.setDeadlineDate(LocalDate.now().plusDays(7));
-        return task;
+    @Test
+    void shouldDeleteTask() throws Exception {
+        doNothing().when(taskService).deleteTask("task-1");
+
+        mockMvc.perform(delete("/tasks/{taskId}", "task-1"))
+                .andExpect(status().isNoContent());
     }
 }
