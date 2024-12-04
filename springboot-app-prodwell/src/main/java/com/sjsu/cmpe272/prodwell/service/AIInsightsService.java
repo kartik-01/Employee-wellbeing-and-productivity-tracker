@@ -36,6 +36,9 @@ public class AIInsightsService {
     }
 
     public Optional<AIInsights> getInsightByOid(String oid) {
+        if (oid == null) {
+            throw new IllegalArgumentException("Insight ID cannot be null");
+        }
         return repository.findById(oid);
     }
 

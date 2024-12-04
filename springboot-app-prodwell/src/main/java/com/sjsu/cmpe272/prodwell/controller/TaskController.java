@@ -42,10 +42,11 @@ public class TaskController {
 
     // Endpoint to get a task by its ID
     @GetMapping("/{taskId}")
-    public Optional<Task> getTaskByTaskId(@PathVariable String taskId) {
-        return taskService.getTaskByTaskId(taskId);
+    public ResponseEntity<Task> getTaskByTaskId(@PathVariable String taskId) {
+        Optional<Task> task = taskService.getTaskByTaskId(taskId);
+        return task.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
-
       // Endpoint to update an existing task
     @PutMapping("/{taskId}")
     public ResponseEntity<Task> updateTask(@PathVariable String taskId, @RequestBody Task task) {
