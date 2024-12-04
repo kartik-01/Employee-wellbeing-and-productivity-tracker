@@ -32,6 +32,7 @@ public class UserDataDTO {
         private LocalDate taskStartDate;
         private LocalDate taskEndDate;
         private int totalNoHours;
+        private String projectCode;
     }
 
     // Custom constructor for partial data

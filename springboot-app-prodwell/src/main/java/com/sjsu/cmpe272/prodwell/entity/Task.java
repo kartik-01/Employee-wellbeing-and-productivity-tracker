@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Encrypted;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -27,7 +29,10 @@ public class Task {
     private LocalDate deadlineDate;
     private LocalDate taskStartDate;
     private LocalDate taskEndDate;
+    @Field
+    @Encrypted
     private int totalNoHours;
+    private String projectCode;
 
     public void generateTaskId() {
         if (this.taskId == null) {

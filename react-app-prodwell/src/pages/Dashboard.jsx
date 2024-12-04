@@ -200,19 +200,18 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       return;
     }
 
-    const dailyHoursArray = Object.entries(dailyHours).map(([date, hours]) => ({
-      [date]: hours
-    }));
-
-    const taskPayload = {
+    const totalNoHours = Object.values(dailyHours).reduce((sum, hours) => 
+      sum + parseInt(hours || 0), 0);
+  
+  const taskPayload = {
       taskName,
       assignedDate,
       deadlineDate,
       taskStartDate,
       taskEndDate,
-      dailyHours: dailyHoursArray,
+      totalNoHours,
       userId,
-      projectCode: claims.extension_ProjectCode, // Add project code from Azure claims
+      projectCode: claims.extension_ProjectCode,
       ...(editMode && { taskId: selectedTaskId })
   };
 

@@ -63,7 +63,8 @@ public class UserDataService {
                     task.getDeadlineDate(),
                     task.getTaskStartDate(),
                     task.getTaskEndDate(),
-                    task.getTotalNoHours()
+                    task.getTotalNoHours(),
+                    task.getProjectCode()
                 ))
                 .collect(Collectors.toList());
             userData.setTasks(taskDataList);
