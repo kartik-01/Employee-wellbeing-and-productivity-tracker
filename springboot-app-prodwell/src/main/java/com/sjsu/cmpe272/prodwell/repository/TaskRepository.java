@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface TaskRepository extends MongoRepository<Task, ObjectId> {
     List<Task> findByUserId(String userId);
     Optional<Task> findByTaskId(String taskId);
+    List<Task> findByProjectCode(String projectCode);
 }

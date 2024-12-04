@@ -24,6 +24,10 @@ const userService = {
     updateTask: (taskId, taskPayload) => axios.put(`${API_BASE_URL}/tasks/${taskId}`, taskPayload),
 
     deleteTask: (taskId) => axios.delete(`${API_BASE_URL}/tasks/${taskId}`),
+
+    getManagerAnalytics: (projectCode) =>  axios.get(`${API_BASE_URL}/api/analytics/manager/${projectCode}`),
+    
+    getHRAnalytics: () =>  axios.get(`${API_BASE_URL}/api/analytics/hr`)
 };
 
 export default userService;
