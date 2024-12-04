@@ -91,12 +91,6 @@ export const NavigationBar = () => {
                             : "text-black"
                         }`}
                     >About Us</Nav.Link>
-                    <Nav.Link
-                        onClick={() => navigate('/survey')}
-                        className={`${location.pathname === "/survey"
-                            ? "bg-[#6200ea] text-white rounded-lg px-3"
-                            : "text-black"
-                        }`}>Survey</Nav.Link>
                 </Nav>
                 {userName ? (
                     <Dropdown align="end">
