@@ -61,8 +61,6 @@ export const LandingPage = () => {
       <Features />
       <RealTimeEditingSection />
       <AnalyticsDashboardSection />
-      <LivePublishingSection />
-      <AdvancedDocumentsSection />
       <FAQSection />
     </div>
   );
