@@ -24,4 +24,14 @@ public class AnalyticsController {
     public ResponseEntity<ManagerAnalyticsDTO> getHRAnalytics() {
         return ResponseEntity.ok(analyticsService.getAnalytics(null, true));
     }
+
+    @GetMapping("/team-insights/{projectCode}")
+    public ResponseEntity<String> getTeamInsights(@PathVariable String projectCode) {
+        return ResponseEntity.ok(analyticsService.teamInsights(projectCode, false));
+    }
+
+    @GetMapping("/hr-insights")
+    public ResponseEntity<String> getHRInsights() {
+        return ResponseEntity.ok(analyticsService.teamInsights(null, true));
+    }
 }
