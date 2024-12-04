@@ -1,5 +1,7 @@
 package com.sjsu.cmpe272.prodwell.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sjsu.cmpe272.prodwell.entity.AIInsights;
@@ -31,48 +33,81 @@ class AIInsightsServiceTest {
     private AIInsightsService service;
 
     @Test
-    void shouldSaveInsight() throws Exception {
-        String llmResponse = "{\"dailyStressLevels\":[],\"averageStressLevel\":5.0,\"analysis\":{}}";
+    void shouldSaveInsightWithFullData() throws Exception {
+        String llmResponse = "{\"dailyStressLevels\":[{\"date\":\"2024-01-01\",\"level\":5.0}],\"averageStressLevel\":5.0,\"analysis\":{\"overview\":\"test\",\"workloadAnalysis\":\"test\"}}";
         JsonNode mockNode = new ObjectMapper().readTree(llmResponse);
         AIInsights insight = new AIInsights();
         insight.setOid("test-oid");
 
         when(objectMapper.readTree(llmResponse)).thenReturn(mockNode);
+        when(objectMapper.convertValue(any(), any(TypeReference.class))).thenReturn(Arrays.asList(new AIInsights.DailyStressLevel()));
+        when(objectMapper.convertValue(any(), eq(AIInsights.Analysis.class))).thenReturn(new AIInsights.Analysis());
         when(repository.save(any(AIInsights.class))).thenReturn(insight);
 
         AIInsights result = service.saveInsight("test-oid", llmResponse);
         assertNotNull(result);
         assertEquals("test-oid", result.getOid());
+        verify(objectMapper).convertValue(any(), any(TypeReference.class));
     }
 
     @Test
-    void shouldGetAllInsights() {
-        AIInsights insight = new AIInsights();
-        when(repository.findAll()).thenReturn(Arrays.asList(insight));
+    void shouldHandleNullFieldsInResponse() throws Exception {
+        String llmResponse = "{\"dailyStressLevels\":null,\"averageStressLevel\":null,\"analysis\":null}";
+        JsonNode mockNode = new ObjectMapper().readTree(llmResponse);
 
+        when(objectMapper.readTree(llmResponse)).thenReturn(mockNode);
+        when(repository.save(any(AIInsights.class))).thenReturn(new AIInsights());
+
+        AIInsights result = service.saveInsight("test-oid", llmResponse);
+        assertNotNull(result);
+    }
+
+    @Test
+    void shouldHandleEmptyResponse() {
+        String emptyResponse = "{}";
+        assertThrows(RuntimeException.class, () -> service.saveInsight("test-oid", emptyResponse));
+    }
+
+    @Test
+    void shouldHandleObjectMapperException() throws Exception {
+        when(objectMapper.readTree(anyString())).thenThrow(new JsonProcessingException("Test exception") {});
+
+        assertThrows(RuntimeException.class, () -> service.saveInsight("test-oid", "{}"));
+    }
+
+    @Test
+    void shouldHandleRepositorySaveException() throws Exception {
+        String llmResponse = "{\"dailyStressLevels\":[],\"averageStressLevel\":5.0,\"analysis\":{}}";
+        JsonNode mockNode = new ObjectMapper().readTree(llmResponse);
+
+        when(objectMapper.readTree(anyString())).thenReturn(mockNode);
+        when(repository.save(any())).thenThrow(new RuntimeException("Save failed"));
+
+        assertThrows(RuntimeException.class, () -> service.saveInsight("test-oid", llmResponse));
+    }
+
+    @Test
+    void shouldGetAllInsightsWhenEmpty() {
+        when(repository.findAll()).thenReturn(Arrays.asList());
         List<AIInsights> results = service.getAllInsights();
-        assertFalse(results.isEmpty());
+        assertTrue(results.isEmpty());
     }
 
     @Test
-    void shouldDeleteInsight() {
-        doNothing().when(repository).deleteById("test-oid");
-        service.deleteInsight("test-oid");
-        verify(repository).deleteById("test-oid");
+    void shouldHandleDeleteNonExistentInsight() {
+        doThrow(new RuntimeException("Not found")).when(repository).deleteById("non-existent");
+        assertThrows(RuntimeException.class, () -> service.deleteInsight("non-existent"));
     }
 
     @Test
-    void shouldThrowExceptionOnInvalidJson() {
-        String invalidJson = "{invalid}";
-        assertThrows(RuntimeException.class, () -> service.saveInsight("test-oid", invalidJson));
+    void shouldReturnEmptyOptionalForNonExistentInsight() {
+        when(repository.findById("non-existent")).thenReturn(Optional.empty());
+        Optional<AIInsights> result = service.getInsightByOid("non-existent");
+        assertFalse(result.isPresent());
     }
 
     @Test
-    void shouldGetInsightByOid() {
-        AIInsights insight = new AIInsights();
-        when(repository.findById("test-oid")).thenReturn(Optional.of(insight));
-
-        Optional<AIInsights> result = service.getInsightByOid("test-oid");
-        assertTrue(result.isPresent());
+    void shouldHandleNullInsightId() {
+        assertThrows(IllegalArgumentException.class, () -> service.getInsightByOid(null));
     }
 }

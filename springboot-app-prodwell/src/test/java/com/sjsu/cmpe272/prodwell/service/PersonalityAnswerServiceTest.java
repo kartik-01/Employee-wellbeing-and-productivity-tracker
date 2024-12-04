@@ -37,41 +37,114 @@ class PersonalityAnswerServiceTest {
         PersonalityAnswer result = service.saveAnswer(answer);
         assertNotNull(result);
         assertNotNull(result.getDateTime());
+        verify(repository).save(any(PersonalityAnswer.class));
     }
 
     @Test
-    void shouldUpdateExistingAnswer() {
+    void shouldUpdateExistingAnswerWithNewQuestions() {
+        // Setup existing answer
         PersonalityAnswer existingAnswer = new PersonalityAnswer();
         existingAnswer.setUserId("test-user");
-        existingAnswer.setAnswers(new ArrayList<>());
+        existingAnswer.setAnswers(new ArrayList<>(Arrays.asList(
+                new PersonalityAnswer.QuestionAnswer("Q1", Arrays.asList("A1"))
+        )));
 
+        // Setup new answer with different question
         PersonalityAnswer newAnswer = new PersonalityAnswer();
         newAnswer.setUserId("test-user");
         newAnswer.setAnswers(Arrays.asList(
-                new PersonalityAnswer.QuestionAnswer("Q1", Arrays.asList("A1"))
+                new PersonalityAnswer.QuestionAnswer("Q2", Arrays.asList("A2"))
         ));
 
         when(repository.findById("test-user")).thenReturn(Optional.of(existingAnswer));
         when(repository.save(any(PersonalityAnswer.class))).thenReturn(existingAnswer);
 
         PersonalityAnswer result = service.saveOrUpdateAnswer(newAnswer);
-        assertNotNull(result);
-        assertFalse(result.getAnswers().isEmpty());
+        assertEquals(2, result.getAnswers().size());
     }
 
     @Test
-    void shouldGetAllAnswers() {
-        List<PersonalityAnswer> answers = Arrays.asList(new PersonalityAnswer());
-        when(repository.findAll()).thenReturn(answers);
+    void shouldUpdateExistingAnswerWithSameQuestion() {
+        // Setup existing answer
+        PersonalityAnswer existingAnswer = new PersonalityAnswer();
+        existingAnswer.setUserId("test-user");
+        existingAnswer.setAnswers(new ArrayList<>(Arrays.asList(
+                new PersonalityAnswer.QuestionAnswer("Q1", Arrays.asList("A1"))
+        )));
+
+        // Setup new answer with same question but different answer
+        PersonalityAnswer newAnswer = new PersonalityAnswer();
+        newAnswer.setUserId("test-user");
+        newAnswer.setAnswers(Arrays.asList(
+                new PersonalityAnswer.QuestionAnswer("Q1", Arrays.asList("A2"))
+        ));
+
+        when(repository.findById("test-user")).thenReturn(Optional.of(existingAnswer));
+        when(repository.save(any(PersonalityAnswer.class))).thenReturn(existingAnswer);
+
+        PersonalityAnswer result = service.saveOrUpdateAnswer(newAnswer);
+        assertEquals(1, result.getAnswers().size());
+        assertEquals("A2", result.getAnswers().get(0).getAnswer().get(0));
+    }
+
+    @Test
+    void shouldSaveNewAnswerWhenNoExisting() {
+        PersonalityAnswer newAnswer = new PersonalityAnswer();
+        newAnswer.setUserId("new-user");
+        newAnswer.setAnswers(Arrays.asList(
+                new PersonalityAnswer.QuestionAnswer("Q1", Arrays.asList("A1"))
+        ));
+
+        when(repository.findById("new-user")).thenReturn(Optional.empty());
+        when(repository.save(any(PersonalityAnswer.class))).thenReturn(newAnswer);
+
+        PersonalityAnswer result = service.saveOrUpdateAnswer(newAnswer);
+        assertNotNull(result.getDateTime());
+        assertEquals(1, result.getAnswers().size());
+    }
+
+    @Test
+    void shouldHandleEmptyAnswersList() {
+        PersonalityAnswer answer = new PersonalityAnswer();
+        answer.setUserId("test-user");
+        answer.setAnswers(new ArrayList<>());
+
+        when(repository.save(any(PersonalityAnswer.class))).thenReturn(answer);
+
+        PersonalityAnswer result = service.saveAnswer(answer);
+        assertTrue(result.getAnswers().isEmpty());
+    }
+
+    @Test
+    void shouldGetAnswerByUserId() {
+        PersonalityAnswer answer = new PersonalityAnswer();
+        when(repository.findById("test-user")).thenReturn(Optional.of(answer));
+
+        Optional<PersonalityAnswer> result = service.getAnswerByUserId("test-user");
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    void shouldReturnEmptyOptionalForNonExistentUser() {
+        when(repository.findById("non-existent")).thenReturn(Optional.empty());
+
+        Optional<PersonalityAnswer> result = service.getAnswerByUserId("non-existent");
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    void shouldGetAllAnswersWhenEmpty() {
+        when(repository.findAll()).thenReturn(new ArrayList<>());
 
         List<PersonalityAnswer> result = service.getAllAnswers();
-        assertFalse(result.isEmpty());
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void shouldDeleteAnswerByUserId() {
-        doNothing().when(repository).deleteById("test-user");
-        service.deleteAnswerByUserId("test-user");
-        verify(repository).deleteById("test-user");
+    void shouldHandleDeleteNonExistentAnswer() {
+        doThrow(new RuntimeException("Not found")).when(repository).deleteById("non-existent");
+
+        assertThrows(RuntimeException.class, () ->
+                service.deleteAnswerByUserId("non-existent"));
     }
 }
