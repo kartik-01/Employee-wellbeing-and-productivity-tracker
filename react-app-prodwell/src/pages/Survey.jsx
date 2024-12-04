@@ -30,10 +30,10 @@ const SurveyPageContent = ({ userId, setUserId }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchSurveyData = async () => {
       try {
-        const response = await userService.getPersonalityQuestions();
-        const validQuestions = response.data.filter(
+        const questionsResponse = await userService.getPersonalityQuestions();
+        const validQuestions = questionsResponse.data.filter(
           (item) => item.question && item.type && item.options
         );
         const formattedQuestions = validQuestions.map((item) => ({
@@ -41,16 +41,55 @@ const SurveyPageContent = ({ userId, setUserId }) => {
           category: "Personality",
           question: item.question,
           type: item.type,
-          options: item.options,
+          options: item.options, // May not apply for range type
         }));
+    
+        // Fetch the user's previously submitted answers
+        const answersResponse = await userService.getUserSurveyAnswers(userId);
+    
+        const prefilledAnswers = (answersResponse.data.answers || []).reduce((acc, answer) => {
+          const question = formattedQuestions.find((q) => q.questionId === answer.questionId);
+    
+          if (question.type === 'range') {
+            // Ensure valid numerical value for range questions
+            acc[answer.questionId] = parseInt(answer.answer[0], 10) || 1; // Default to 1 if invalid
+          } else if (question.type === 'multiSelect') {
+            acc[answer.questionId] = answer.answer.filter((ans) =>
+              question.options.includes(ans)
+            );
+            const otherAnswers = answer.answer.filter((ans) =>
+              !question.options.includes(ans)
+            );
+            if (otherAnswers.length > 0) {
+              acc[answer.questionId] = [
+                ...(acc[answer.questionId] || []),
+                'Other (Please specify)',
+              ];
+              acc[`other-${answer.questionId}`] = otherAnswers.join(', ');
+            }
+          } else {
+            const isValidAnswer = question.options.includes(answer.answer[0]);
+            if (isValidAnswer) {
+              acc[answer.questionId] = answer.answer[0];
+            } else {
+              acc[answer.questionId] = 'Other (Please specify)';
+              acc[`other-${answer.questionId}`] = answer.answer[0];
+            }
+          }
+          return acc;
+        }, {});
+    
         setQuestions(formattedQuestions);
+        setSelectedAnswers(prefilledAnswers); // Pre-fill the selected answers
       } catch (error) {
-        console.error("Error fetching questions:", error);
+        console.error("Error fetching survey data:", error);
       }
     };
-
-    fetchQuestions();
-  }, []);
+    
+  
+    fetchSurveyData();
+  }, [userId]);
+  
 
   useEffect(() => {
     const currentQuestion = questions[currentQuestionIndex];
@@ -192,13 +231,23 @@ const SurveyPageContent = ({ userId, setUserId }) => {
     };
   
     try {
-      await userService.submitPersonalityAnswers(payload);
-      console.log("Survey submitted successfully.");
+      // Check if user already exists in personality answers
+      const existingAnswersResponse = await userService.getUserSurveyAnswers(userId);
+      if (existingAnswersResponse?.data?.answers?.length > 0) {
+        // If existing user, send a PUT request
+        await userService.updatePersonalityAnswers(payload);
+        console.log("Survey updated successfully.");
+      } else {
+        // If new user, send a POST request
+        await userService.submitPersonalityAnswers(payload);
+        console.log("Survey submitted successfully.");
+      }
       navigate('/dashboard');
     } catch (error) {
-      console.error('Error submitting survey:', error);
+      console.error('Error submitting or updating survey:', error);
     }
   };
+  
   
 
   const isAnswerValid = (index) => {
