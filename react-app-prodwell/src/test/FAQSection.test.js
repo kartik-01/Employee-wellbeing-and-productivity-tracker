@@ -1,8 +1,8 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import FAQSection from "./FAQSection";
+import FAQSection from "../components/FAQSection";
 
-jest.mock("./FAQItem", () => ({ question }) => (
+jest.mock("../components/FAQItem", () => ({ question }) => (
   <div>{question}</div>
 ));
 

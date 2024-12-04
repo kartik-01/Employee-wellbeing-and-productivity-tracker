@@ -1,9 +1,9 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import ContactDetails from "./ContactDetails";
+import ContactDetails from "../components/ContactDetails";
 
 
-jest.mock("./FeatureCard", () => ({ image, title, description }) => (
+jest.mock("../components/FeatureCard", () => ({ image, title, description }) => (
   <div>
     <img src={image} alt={title} />
     <h3>{title}</h3>

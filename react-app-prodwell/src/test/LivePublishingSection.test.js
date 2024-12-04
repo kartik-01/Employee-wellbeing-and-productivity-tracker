@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import LivePublishingSection from "./LivePublishingSection";  
+import LivePublishingSection from "../components/LivePublishingSection";  
 
 describe("LivePublishingSection", () => {
   test("renders Live Publishing heading", () => {

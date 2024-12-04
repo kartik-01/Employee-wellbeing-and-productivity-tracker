@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import FeatureSection from './Features';
+import FeatureSection from '../components/Features';
 
 describe('FeatureSection Component', () => {
   test('renders the title text correctly', () => {

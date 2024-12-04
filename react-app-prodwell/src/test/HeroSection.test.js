@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import HeroSection from "./HeroSection";
+import HeroSection from "../components/HeroSection";
 import "@testing-library/jest-dom"; 
 
 describe("HeroSection Component", () => {

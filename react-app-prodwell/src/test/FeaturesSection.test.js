@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import FeaturesSection from './FeaturesSection';
+import FeaturesSection from '../components/FeaturesSection';
 
 describe('FeaturesSection Component', () => {
   beforeEach(() => {

@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import FeatureCard from "./FeatureCard";
+import FeatureCard from "../components/FeatureCard";
 
 const mockImage = "https://example.com/image.jpg";
 const mockTitle = "John Doe";

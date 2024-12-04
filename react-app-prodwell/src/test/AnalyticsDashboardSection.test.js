@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import AnalyticsDashboardSection from "./AnalyticsDashboardSection";
+import AnalyticsDashboardSection from "../components/AnalyticsDashboardSection";
 
 describe("AnalyticsDashboardSection", () => {
   it("renders the 'Analytics Dashboard' header", () => {

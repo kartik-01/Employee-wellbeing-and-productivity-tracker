@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import AdvancedDocumentsSection from "./AdvancedDocumentsSection";
+import AdvancedDocumentsSection from "../components/AdvancedDocumentsSection";
 
 describe("AdvancedDocumentsSection", () => {
   it("renders the 'Advanced Documents' header", () => {

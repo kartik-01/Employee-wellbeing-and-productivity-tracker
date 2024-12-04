@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import FAQItem from './FAQItem';
+import FAQItem from '../components/FAQItem';
 
 describe('FAQItem Component', () => {
     const sampleQuestion = "What is React?";
