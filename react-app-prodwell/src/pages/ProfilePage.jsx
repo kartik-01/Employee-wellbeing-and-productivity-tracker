@@ -5,6 +5,7 @@ import { b2cPolicies } from '../authConfig';
 import { MsalAuthenticationTemplate } from '@azure/msal-react';
 import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
+import { useNavigate } from "react-router-dom";
 
 export const ProfilePage = () => {
     const authRequest = {
@@ -24,6 +25,7 @@ export const ProfilePage = () => {
 const ProfilePageContent = () => {
     const { accounts, instance } = useMsal();
     const claims = accounts[0]?.idTokenClaims || {};
+    const navigate = useNavigate();
 
     const handleEditProfile = () => {
         instance.loginRedirect({
@@ -37,6 +39,10 @@ const ProfilePageContent = () => {
             authority: b2cPolicies.authorities.resetPassword.authority,
             scopes: []
         }).catch((error) => console.log(error));
+    };
+
+    const handleFillSurvey = () => {
+        navigate("/survey");
     };
 
     return (
@@ -78,18 +84,29 @@ const ProfilePageContent = () => {
                         <label className="text-base font-bold text-gray-800 mb-1">Email</label>
                         <p className="text-xl text-gray-600">{claims.emails?.[0]}</p>
                     </div>
-                    
 
-                    <div className="flex flex-col items-center gap-4">
+                    {/* Buttons Section */}
+                    <div className="flex justify-center gap-4 mt-8">
+                        {/* Fill Survey Button */}
+                        <button 
+                            onClick={handleFillSurvey}
+                            className="px-4 py-2 bg-gray-100 text-gray-800 rounded shadow-md hover:bg-gray-200 hover:text-[#0078D4] transition-all text-sm font-medium"
+                        >
+                            Fill Survey
+                        </button>
+
+                        {/* Edit Profile Button */}
                         <button 
                             onClick={handleEditProfile}
-                            className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all w-48"
+                            className="px-4 py-2 bg-gray-100 text-gray-800 rounded shadow-md hover:bg-gray-200 hover:text-[#0078D4] transition-all text-sm font-medium"
                         >
                             Edit Profile
                         </button>
+
+                        {/* Reset Password Button */}
                         <button 
                             onClick={handleResetPassword}
-                            className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all w-48"
+                            className="px-4 py-2 bg-gray-100 text-gray-800 rounded shadow-md hover:bg-gray-200 hover:text-[#0078D4] transition-all text-sm font-medium"
                         >
                             Reset Password
                         </button>
