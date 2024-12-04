@@ -1,6 +1,6 @@
 import axios from './axiosConfig';
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = process.env.BACKEND_URL;
 
 const userService = {
     checkAndCreateUser: (userData) => axios.post(`${API_BASE_URL}/api/users/check-and-create`, userData),

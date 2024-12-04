@@ -29,8 +29,8 @@ export const msalConfig = {
         clientId: '1390abed-3d4d-497d-ab36-84a00ffad2bd', // Updated client ID
         authority: b2cPolicies.authorities.signUpSignIn.authority, // Updated authority
         knownAuthorities: [b2cPolicies.authorityDomain], // Updated known authorities
-        redirectUri: 'http://localhost:3000', // Ensure this is registered in Azure Portal
-        postLogoutRedirectUri: 'http://localhost:3000',
+        redirectUri: process.env.REACT_APP_REDIRECT_URI, // Ensure this is registered in Azure Portal
+        postLogoutRedirectUri: process.env.REACT_APP_REDIRECT_URI,
         navigateToLoginRequestUrl: false,
     },
     cache: {
