@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sjsu.cmpe272.prodwell.entity.User;
 import com.sjsu.cmpe272.prodwell.service.UserService;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "${cors.allowed-origins}")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
