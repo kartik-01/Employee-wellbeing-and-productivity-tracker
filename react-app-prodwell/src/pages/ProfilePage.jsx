@@ -57,16 +57,28 @@ const ProfilePageContent = () => {
                             <p className="text-xl text-gray-600">{claims.family_name}</p>
                         </div>
                     </div>
+
+                    <div className="grid grid-cols-2 gap-8 mb-6">
+                        <div className="flex flex-col">
+                            <label className="text-base font-bold text-gray-800 mb-1">Job Role</label>
+                            <p className="text-xl text-gray-600">{claims.extension_JobRole}</p>
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-base font-bold text-gray-800 mb-1">Job Level</label>
+                            <p className="text-xl text-gray-600">{claims.extension_JobLevel}</p>
+                        </div>
+                    </div>
+
+                    <div className="mb-6">
+                        <label className="text-base font-bold text-gray-800 mb-1">Project</label>
+                        <p className="text-xl text-gray-600">{claims.extension_ProjectCode}</p>
+                    </div>
                     
                     <div className="mb-6">
                         <label className="text-base font-bold text-gray-800 mb-1">Email</label>
                         <p className="text-xl text-gray-600">{claims.emails?.[0]}</p>
                     </div>
                     
-                    <div className="mb-8">
-                        <label className="text-base font-bold text-gray-800 mb-1">Job Title</label>
-                        <p className="text-xl text-gray-600">{claims.jobTitle}</p>
-                    </div>
 
                     <div className="flex flex-col items-center gap-4">
                         <button 
