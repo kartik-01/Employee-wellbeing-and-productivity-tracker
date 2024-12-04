@@ -220,6 +220,7 @@ const SurveyPageContent = ({ userId, setUserId }) => {
   const currentQuestion = questions[currentQuestionIndex];
 
   return (
+    
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-2xl p-10 bg-white rounded-lg shadow-md">
         <h1 className="text-3xl font-bold text-center mb-10">Let Us Know About You</h1>

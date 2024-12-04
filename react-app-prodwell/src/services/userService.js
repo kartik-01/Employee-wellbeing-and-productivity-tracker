@@ -27,7 +27,10 @@ const userService = {
 
     getManagerAnalytics: (projectCode) =>  axios.get(`${API_BASE_URL}/api/analytics/manager/${projectCode}`),
     
-    getHRAnalytics: () =>  axios.get(`${API_BASE_URL}/api/analytics/hr`)
+    getHRAnalytics: () =>  axios.get(`${API_BASE_URL}/api/analytics/hr`),
+    
+    getTeamInsights: (projectCode) => axios.get(`${API_BASE_URL}/api/analytics/team-insights/${projectCode}`),
+    checkPersonalityAnswerExists: (userId) => axios.get(`${API_BASE_URL}/personalityAnswers/exists/${userId}`),
 };
 
 export default userService;

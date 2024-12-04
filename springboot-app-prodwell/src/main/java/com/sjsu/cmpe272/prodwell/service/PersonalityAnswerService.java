@@ -72,4 +72,8 @@ public class PersonalityAnswerService {
     public List<PersonalityAnswer> getAllAnswers() {
         return repository.findAll();
     }
+
+    public boolean existsById(String userId) {
+        return repository.existsById(userId);
+    }
 }

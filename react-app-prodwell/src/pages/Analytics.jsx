@@ -41,6 +41,8 @@ const AnalyticsPageContent = () => {
     const isHR = claims.extension_JobLevel === 'HR';
     const [analyticsData, setAnalyticsData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [insightsData, setInsightsData] = useState(null);
+    const [isLoadingInsights, setIsLoadingInsights] = useState(true);
 
     useEffect(() => {
         const fetchAnalytics = async () => {
@@ -60,6 +62,25 @@ const AnalyticsPageContent = () => {
 
         if (isManager || isHR) {
             fetchAnalytics();
+        }
+    }, [isManager, isHR, claims.extension_ProjectCode]);
+
+    useEffect(() => {
+        const fetchInsights = async () => {
+            try {
+                const response = isManager 
+                    ? await userService.getTeamInsights(claims.extension_ProjectCode)
+                    : await userService.getHRInsights();
+                setInsightsData(response.data);
+            } catch (error) {
+                console.error('Error fetching insights:', error);
+            } finally {
+                setIsLoadingInsights(false);
+            }
+        };
+
+        if (isManager || isHR) {
+            fetchInsights();
         }
     }, [isManager, isHR, claims.extension_ProjectCode]);
 
@@ -164,17 +185,26 @@ const AnalyticsPageContent = () => {
                     </div>
                 </div>
 
+                {/* Team Insights or Organization Insights Card */}
                 <div className="mt-6 bg-white rounded-lg shadow-sm p-8">
                     <h2 className="text-2xl font-bold text-gray-800 mb-6">
                         {isManager ? "Team Insights" : "Organization Insights"}
                     </h2>
                     <div className="prose max-w-none">
-                        <p className="text-gray-600">
-                            {isManager 
-                                ? "Monitor your team's performance and well-being through aggregated task completion rates and stress level trends. Use these insights to maintain a healthy work environment and optimize team productivity."
-                                : "Access comprehensive analytics about organizational health, employee productivity, and stress management across all departments and projects. Use these insights for strategic workforce planning and wellness initiatives."
-                            }
-                        </p>
+                        {isLoadingInsights ? (
+                            <div className="flex justify-center items-center h-24">
+                                <ClipLoader size={30} color="#4CAF50" />
+                            </div>
+                        ) : (
+                            <>
+                                <p className="text-gray-600 mb-4">
+                                    <strong>Stress Levels:</strong> {insightsData?.stressLevels}
+                                </p>
+                                <p className="text-gray-600">
+                                    <strong>Recommendations:</strong> {insightsData?.recommendations}
+                                </p>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

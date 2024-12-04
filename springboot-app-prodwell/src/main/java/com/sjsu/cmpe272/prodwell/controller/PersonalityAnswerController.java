@@ -47,4 +47,10 @@ public class PersonalityAnswerController {
     public List<PersonalityAnswer> getAllAnswers() {
         return service.getAllAnswers();
     }
+
+    @GetMapping("/exists/{userId}")
+public ResponseEntity<Boolean> checkAnswerExists(@PathVariable String userId) {
+    boolean exists = service.existsById(userId);
+    return ResponseEntity.ok(exists);
+}
 }
