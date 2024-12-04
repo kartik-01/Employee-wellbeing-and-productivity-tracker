@@ -15,11 +15,12 @@ public class User {
     @Id
     private String id;
     private String oid;
+    private String email;
     private String given_name;
     private String family_name;
-    private String jobTitle;
-    private String country;
-    private String city;
+    private String jobRole;
+    private String jobLevel;
+    private String projectCode;
 
     // Getters
     public String getId() {
@@ -30,6 +31,11 @@ public class User {
         return this.oid;
     }
 
+    public String getEmail() {
+        return this.email;
+    }
+
+
     public String getGiven_name() {
         return this.given_name;
     }
@@ -38,16 +44,16 @@ public class User {
         return this.family_name;
     }
 
-    public String getJobTitle() {
-        return this.jobTitle;
+    public String getJobRole() {
+        return this.jobRole;
     }
 
-    public String getCountry() {
-        return this.country;
+    public String getJobLevel() {
+        return this.jobLevel;
     }
 
-    public String getCity() {
-        return this.city;
+    public String getProjectCode() {
+        return this.projectCode;
     }
 
     // Setters
@@ -59,6 +65,11 @@ public class User {
         this.oid = oid;
     }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+
     public void setGiven_name(String given_name) {
         this.given_name = given_name;
     }
@@ -67,15 +78,13 @@ public class User {
         this.family_name = family_name;
     }
 
-    public void setJobTitle(String jobTitle) {
-        this.jobTitle = jobTitle;
+    public void setJobRole(String jobTitle) {
+        this.jobRole = jobTitle;
     }
-
-    public void setCountry(String country) {
-        this.country = country;
+    public void setJobLevel(String jobTitle) {
+        this.jobLevel = jobTitle;
     }
-
-    public void setCity(String city) {
-        this.city = city;
+    public void setProjectCode(String projectCode) {
+        this.projectCode = projectCode;
     }
 }

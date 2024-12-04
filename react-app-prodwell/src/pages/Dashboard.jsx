@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MsalAuthenticationTemplate } from '@azure/msal-react';
+import { MsalAuthenticationTemplate, useMsal } from '@azure/msal-react';
 import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
 import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
@@ -47,7 +47,8 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showAnalysis, setShowAnalysis] = useState(false);
-
+  const { accounts } = useMsal();
+  const claims = accounts[0]?.idTokenClaims || {};
   useEffect(() => {
     if (userId) {
       fetchTasks();
@@ -189,8 +190,11 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       taskEndDate,
       dailyHours: dailyHoursArray,
       userId,
+      projectCode: claims.extension_ProjectCode,
       ...(editMode && { taskId: selectedTaskId }) 
     };
+
+    console.log(taskPayload)
 
     try {
       setIsLoading(true);

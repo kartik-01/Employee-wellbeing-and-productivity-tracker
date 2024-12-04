@@ -29,6 +29,7 @@ public class Task {
     private LocalDate deadlineDate;
     private LocalDate taskStartDate;
     private LocalDate taskEndDate;
+    private String projectCode;
     private List<Map<String, Integer>> dailyHours;
     public void generateTaskId() {
         if (this.taskId == null || this.taskId.isEmpty()) {
