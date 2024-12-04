@@ -15,7 +15,15 @@ const userService = {
 
     updatePersonalityAnswers: (payload) => axios.put(`${API_BASE_URL}/personalityAnswers/${payload.userId}`, payload),
     
-    getAIInsights: (oid) => axios.get(`${API_BASE_URL}/api/users/${oid}/ai-insights`),
+    getAIInsights: (oid, token) => axios.post(
+        `${API_BASE_URL}/api/users/${oid}/ai-insights`,
+        {},
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    ), 
 
     getUserTasks: (userId) => axios.get(`${API_BASE_URL}/tasks/user/${userId}`),
 
@@ -34,3 +42,8 @@ const userService = {
 };
 
 export default userService;
+
+
+
+
+
