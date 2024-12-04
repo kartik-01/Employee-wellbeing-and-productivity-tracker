@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MsalAuthenticationTemplate } from '@azure/msal-react';
+import { MsalAuthenticationTemplate, useMsal} from '@azure/msal-react';
 import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
 import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
@@ -278,18 +278,22 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       taskEndDate,
       dailyHours: dailyHoursArray,
       userId,
-      ...(editMode && { taskId: selectedTaskId }) 
-    };
+      projectCode: claims.extension_ProjectCode, // Add project code from Azure claims
+      ...(editMode && { taskId: selectedTaskId })
+  };
 
-    try {
+  console.log("PAYLOAD", taskPayload)
+
+  try {
       setIsLoading(true);
       if (editMode) {
-        await userService.updateTask(selectedTaskId, taskPayload);
-    } else {
-        await userService.addTask(taskPayload);
-    }
+          await userService.updateTask(selectedTaskId, taskPayload);
+      } else {
+          await userService.addTask(taskPayload);
+      }
       await fetchTasks();
-
+      
+      // Clear form and reset edit mode
       setTaskName("");
       setAssignedDate("");
       setDeadlineDate("");

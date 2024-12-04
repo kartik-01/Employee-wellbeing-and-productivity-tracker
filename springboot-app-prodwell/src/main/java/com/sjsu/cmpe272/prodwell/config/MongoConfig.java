@@ -19,6 +19,10 @@ public class MongoConfig {
     @Bean
     public MongoCustomConversions customConversions() {
         List<Converter<?, ?>> converters = new ArrayList<>();
+        // Add DailyHours converters first
+        converters.add(new DailyHoursConverter.DailyHoursWritingConverter());
+        converters.add(new DailyHoursConverter.DailyHoursReadingConverter());
+        // Then add encryption converters
         converters.add(new EncryptedAnswerWritingConverter(encryptionService));
         converters.add(new EncryptedAnswerReadingConverter(encryptionService));
         converters.add(new EncryptedAIInsightWritingConverter(encryptionService));

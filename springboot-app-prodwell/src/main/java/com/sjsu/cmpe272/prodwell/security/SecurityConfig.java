@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .requestMatchers("/personalityAnswers/**").permitAll()
                 .requestMatchers("/tasks/user/**").permitAll()
                 .requestMatchers("/tasks/**").permitAll()
+                .requestMatchers("/api/analytics/**").permitAll()
                 .requestMatchers("/api/users/{oid}/ai-insights").permitAll()
                 .anyRequest().authenticated()
             )
