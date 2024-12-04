@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MsalAuthenticationTemplate } from '@azure/msal-react';
+import { MsalAuthenticationTemplate, useMsal} from '@azure/msal-react';
 import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from "../authConfig";
 import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
@@ -47,6 +47,8 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const { accounts } = useMsal();
+  const claims = accounts[0]?.idTokenClaims || {};
 
   useEffect(() => {
     if (userId) {
@@ -189,18 +191,22 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       taskEndDate,
       dailyHours: dailyHoursArray,
       userId,
-      ...(editMode && { taskId: selectedTaskId }) 
-    };
+      projectCode: claims.extension_ProjectCode, // Add project code from Azure claims
+      ...(editMode && { taskId: selectedTaskId })
+  };
 
-    try {
+  console.log("PAYLOAD", taskPayload)
+
+  try {
       setIsLoading(true);
       if (editMode) {
-        await userService.updateTask(selectedTaskId, taskPayload);
-    } else {
-        await userService.addTask(taskPayload);
-    }
+          await userService.updateTask(selectedTaskId, taskPayload);
+      } else {
+          await userService.addTask(taskPayload);
+      }
       await fetchTasks();
-
+      
+      // Clear form and reset edit mode
       setTaskName("");
       setAssignedDate("");
       setDeadlineDate("");
@@ -212,10 +218,10 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       setSelectedTaskId(null);
       setIsChanged(false);
       setOriginalTask(null);
-    } catch (error) {
-      console.error(`Network error while ${editMode ? "updating" : "adding"} task:`, error);
-    }
-  };
+  } catch (error) {
+      console.error(`Error ${editMode ? "updating" : "adding"} task:`, error);
+  }
+};
   const accordData = {
     overview:
       "Hello Trump, your stress levels indicate that you are managing a significant workload, especially around the mid-to-end of the month. It's clear that you are diligent and committed to your tasks, but it's important to balance your work and personal life to avoid burnout.",

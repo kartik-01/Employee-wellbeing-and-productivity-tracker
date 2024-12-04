@@ -10,33 +10,32 @@ import { EventType } from '@azure/msal-browser';
 export const NavigationBar = () => {
     const { instance } = useMsal();
     const [userName, setUserName] = useState('');
+    const [userLevel, setUserLevel] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
-        // Function to update userName based on active account
-        const updateUserName = () => {
+        const updateUserInfo = () => {
             const account = instance.getActiveAccount();
             if (account && account.idTokenClaims) {
                 setUserName(account.idTokenClaims.given_name || 'User Account');
+                setUserLevel(account.idTokenClaims.extension_JobLevel || '');
             } else {
-                setUserName(''); // Clear username if no account is found
+                setUserName('');
+                setUserLevel('');
             }
         };
 
-        // Initial call to set userName
-        updateUserName();
+        updateUserInfo();
 
-        // Add event callback to listen for login success
         const callbackId = instance.addEventCallback((event) => {
             if (event.eventType === EventType.LOGIN_SUCCESS ||
                 event.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) {
-                updateUserName(); // Update username on successful login
+                updateUserInfo();
             }
         });
 
         return () => {
-            // Clean up event callback on unmount
             if (callbackId) {
                 instance.removeEventCallback(callbackId);
             }
@@ -51,7 +50,7 @@ export const NavigationBar = () => {
         instance.logoutRedirect().catch((error) => console.log(error));
     };
 
-    
+    const isManagerOrHR = userLevel === 'Manager' || userLevel === 'HR';
 
     return (
         <Navbar bg="light" expand="lg" className="px-3 custom-navbar">
@@ -72,23 +71,32 @@ export const NavigationBar = () => {
                     <Nav.Link
                         onClick={() => navigate('/dashboard')}
                         className={`${location.pathname === "/dashboard"
+                            ? "bg-[#6200ea] text-white rounded-lg px-3"
+                            : "text-black"
+                        }`}
+                    >Dashboard</Nav.Link>
+                    {isManagerOrHR && (
+                        <Nav.Link
+                            onClick={() => navigate('/analytics')}
+                            className={`${location.pathname === "/analytics"
                                 ? "bg-[#6200ea] text-white rounded-lg px-3"
                                 : "text-black"
                             }`}
-                    >Dashboard</Nav.Link>
+                        >Analytics</Nav.Link>
+                    )}
                     <Nav.Link
                         href="/aboutus"
                         className={`${location.pathname === "/aboutus"
                             ? "bg-[#6200ea] text-white rounded-lg px-3"
                             : "text-black"
-                            }`}
+                        }`}
                     >About Us</Nav.Link>
                     <Nav.Link
                         onClick={() => navigate('/survey')}
                         className={`${location.pathname === "/survey"
                             ? "bg-[#6200ea] text-white rounded-lg px-3"
                             : "text-black"
-                            }`}>Survey</Nav.Link>
+                        }`}>Survey</Nav.Link>
                 </Nav>
                 {userName ? (
                     <Dropdown align="end">
@@ -97,7 +105,7 @@ export const NavigationBar = () => {
                         </Dropdown.Toggle>
 
                         <Dropdown.Menu>
-                        <Dropdown.Item onClick={() => navigate('/profile')}>My Profile</Dropdown.Item>
+                            <Dropdown.Item onClick={() => navigate('/profile')}>My Profile</Dropdown.Item>
                             <Dropdown.Divider />
                             <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
                         </Dropdown.Menu>
