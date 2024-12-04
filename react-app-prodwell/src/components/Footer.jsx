@@ -1,4 +1,6 @@
 import React from "react";
+import logo from '../assets/images/prodwell.png';
+import { Nav, Navbar, Button, Dropdown } from 'react-bootstrap';
 
 const Footer = () => {
   return (
@@ -6,18 +8,28 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           {/* Left Section */}
-          <div className="text-center md:text-left mb-4 md:mb-0">
+          <div className="flex space-x-4 text-l">
             <p>&copy; {new Date().getFullYear()} ProdWell. All Rights Reserved.</p>
           </div>
           {/* Right Section */}
-          <div className="flex space-x-4 text-sm">
-            <a href="/privacy" className="hover:text-white transition">
-              Privacy Policy
+          <div className="flex space-x-4 text-l">
+            <a href="" className="hover:text-white transition">
+              CMPE272
             </a>
             <span>|</span>
-            <a href="/terms" className="hover:text-white transition">
-              Terms of Service
+            <a href="" className="hover:text-white transition">
+              Enterprise Software Platforms
             </a>
+            <Navbar.Brand href="/" className="mr-auto font-weight-bold">
+                <img
+                    src={logo}
+                    width="30"
+                    height="30"
+                    className="d-inline-block align-top"
+                    alt="ProdWell logo"
+                    style={{ borderRadius: "50%" }} 
+                />
+            </Navbar.Brand>
           </div>
         </div>
       </div>

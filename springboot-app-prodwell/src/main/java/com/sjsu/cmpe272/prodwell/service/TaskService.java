@@ -6,6 +6,7 @@ import com.sjsu.cmpe272.prodwell.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TaskService {
@@ -42,26 +43,34 @@ public class TaskService {
     }
 
     // Get task by its ID
-    public Task getTaskByTaskId(String taskId) {
+    public Optional<Task> getTaskByTaskId(String taskId) {
         return taskRepository.findByTaskId(taskId);
     }
 
-    // Update an existing task
-    public Task updateTask(Task task) {
-        if (!userRepository.existsByOid(task.getUserId())) {
-            throw new IllegalArgumentException("Invalid userOid: " + task.getUserId());
+     // Update an existing task
+     public Task updateTask(Task task) {
+        Optional<Task> existingTaskOptional = taskRepository.findByTaskId(task.getTaskId());
+        if (existingTaskOptional.isEmpty()) {
+            return null; // Task not found, return null
         }
-        if (task.getTaskId() == null) {
-            task.generateTaskId();
-        }
-        return taskRepository.save(task);
+
+        Task existingTask = existingTaskOptional.get();
+        // Update fields from the input task object
+        existingTask.setTaskName(task.getTaskName());
+        existingTask.setAssignedDate(task.getAssignedDate());
+        existingTask.setDeadlineDate(task.getDeadlineDate());
+        existingTask.setTaskStartDate(task.getTaskStartDate());
+        existingTask.setTaskEndDate(task.getTaskEndDate());
+        existingTask.setDailyHours(task.getDailyHours());
+
+        return taskRepository.save(existingTask); // Save updated task to the repository
     }
 
-    // Delete task by its ID
-    public void deleteTask(String taskId) {
-        Task task = taskRepository.findByTaskId(taskId);
-        if (task != null) {
-            taskRepository.delete(task);
+     // Delete task by its ID
+     public void deleteTask(String taskId) {
+        Optional<Task> taskOptional = taskRepository.findByTaskId(taskId);
+        if (taskOptional.isPresent()) {
+            taskRepository.delete(taskOptional.get());
         }
     }
 }

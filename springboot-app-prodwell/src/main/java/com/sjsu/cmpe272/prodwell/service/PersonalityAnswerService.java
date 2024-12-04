@@ -22,42 +22,40 @@ public class PersonalityAnswerService {
     }
 
     public PersonalityAnswer saveOrUpdateAnswer(PersonalityAnswer newAnswer) {
-        // Check if the record already exists for the given userId
+        // Fetch existing answer for the userId
         Optional<PersonalityAnswer> existingAnswerOptional = repository.findById(newAnswer.getUserId());
-
+    
         if (existingAnswerOptional.isPresent()) {
-            // Update existing record
+            // If existing, update the fields
             PersonalityAnswer existingAnswer = existingAnswerOptional.get();
-            List<PersonalityAnswer.QuestionAnswer> updatedAnswers = newAnswer.getAnswers();
-
-            // Update each question-answer pair in the existing record
-            for (PersonalityAnswer.QuestionAnswer updatedQA : updatedAnswers) {
-                boolean questionExists = false;
-
+            existingAnswer.setDateTime(LocalDateTime.now()); // Update timestamp
+            
+            // Update or add question-answers
+            for (PersonalityAnswer.QuestionAnswer newQA : newAnswer.getAnswers()) {
+                boolean isUpdated = false;
+    
                 for (PersonalityAnswer.QuestionAnswer existingQA : existingAnswer.getAnswers()) {
-                    if (existingQA.getQuestionId().equals(updatedQA.getQuestionId())) {
-                        // Update the existing question's answers
-                        existingQA.setAnswer(updatedQA.getAnswer());
-                        questionExists = true;
+                    if (existingQA.getQuestionId().equals(newQA.getQuestionId())) {
+                        existingQA.setAnswer(newQA.getAnswer());
+                        isUpdated = true;
                         break;
                     }
                 }
-
-                // If the question does not exist, add it as a new entry
-                if (!questionExists) {
-                    existingAnswer.getAnswers().add(updatedQA);
+    
+                if (!isUpdated) {
+                    // Add new question-answer pair if it doesn't exist
+                    existingAnswer.getAnswers().add(newQA);
                 }
             }
-
-            existingAnswer.setDateTime(LocalDateTime.now()); // Update timestamp
+    
+            // Save the updated record
             return repository.save(existingAnswer);
         } else {
-            // Create a new record
+            // If no existing record, save as new
             newAnswer.setDateTime(LocalDateTime.now());
             return repository.save(newAnswer);
         }
-    }
-
+    }    
     public Optional<PersonalityAnswer> getAnswerByUserId(String userId) {
         return repository.findById(userId);
     }

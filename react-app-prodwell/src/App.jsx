@@ -15,6 +15,7 @@ import { DashboardPage } from './pages/Dashboard';
 import './styles/App.css';
 import { ProfilePage } from './pages/ProfilePage';
 import { AboutUs } from './pages/AboutUs';
+import { AnalyticsPage } from './pages/Analytics';
 
 const Pages = ({ userId, setUserId }) => {
     const { instance } = useMsal();
@@ -36,11 +37,12 @@ const Pages = ({ userId, setUserId }) => {
 
                 const userData = {
                     oid: event.payload.idTokenClaims.oid,
+                    email: event.payload.idTokenClaims.emails[0],
                     given_name: event.payload.idTokenClaims.given_name,
                     family_name: event.payload.idTokenClaims.family_name,
-                    jobTitle: event.payload.idTokenClaims.jobTitle,
-                    country: event.payload.idTokenClaims.country,
-                    city: event.payload.idTokenClaims.city
+                    jobRole: event.payload.idTokenClaims.extension_JobRole,
+                    jobLevel: event.payload.idTokenClaims.extension_JobLevel,
+                    projectCode: event.payload.idTokenClaims.extension_ProjectCode,
                 };
 
                 userService.checkAndCreateUser(userData)
@@ -51,16 +53,6 @@ const Pages = ({ userId, setUserId }) => {
                     .catch(error => {
                         console.error('Error checking/creating user:', error);
                     });
-
-                if (event.payload.idTokenClaims.given_name && event.payload.idTokenClaims.given_name.trim() === "Kartik Nitisn") {
-                    if (location.pathname !== "/survey") {
-                        navigate("/survey");
-                    }
-                } else {
-                    if (location.pathname !== "/dashboard") {
-                        navigate("/dashboard");
-                    }
-                }
 
                 setInitialRedirectDone(true);
 
@@ -120,6 +112,7 @@ const Pages = ({ userId, setUserId }) => {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/dashboard" element={<DashboardPage userId={userId} setUserId={setUserId} />} />
             <Route path="/aboutus" element={<AboutUs />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
         </Routes>
     );
 };
