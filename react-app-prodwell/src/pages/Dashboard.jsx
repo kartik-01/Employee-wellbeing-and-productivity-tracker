@@ -8,8 +8,7 @@ import { Chart as ChartJS, CategoryScale, Title, Tooltip, Legend, ArcElement, Li
 import dayjs from 'dayjs';
 import { ClipLoader } from 'react-spinners'; // Import spinner component
 import userService from '../services/userService';
-import { Accordion } from "react-bootstrap";
-
+import { FaMagic } from 'react-icons/fa';
 ChartJS.register(CategoryScale, Title, Tooltip, Legend, ArcElement, LinearScale, PointElement, LineElement);
 
 export const DashboardPage = ({ userId, setUserId }) => {
@@ -46,10 +45,77 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
   const rightCardRef = useRef(null);
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [showAnalysis, setShowAnalysis] = useState(false);
   const { accounts } = useMsal();
   const claims = accounts[0]?.idTokenClaims || {};
+  const [showAnalysis, setShowAnalysis] = useState(false); 
+  const [accordData, setAccordData] = useState({});
+  const [averageStressLevel, setAverageStressLevel] = useState(null);
 
+  const fetchAIInsights = async () => {
+    try {
+      setIsLoading(true);
+  
+      // Hardcoded data
+      const hardcodedResponse = {
+        name: "Vyshnavi",
+        dailyStressLevels: [
+          { date: "2024-12-11", stressLevel: 7.5 },
+          { date: "2024-12-12", stressLevel: 8.5 },
+          { date: "2024-12-13", stressLevel: 7 },
+          { date: "2024-12-14", stressLevel: 8.5 },
+          { date: "2024-12-15", stressLevel: 5.5 },
+          { date: "2024-12-16", stressLevel: 6 },
+          { date: "2024-12-17", stressLevel: 6 },
+          { date: "2024-12-18", stressLevel: 10 },
+          { date: "2024-12-19", stressLevel: 5.5 },
+          { date: "2024-12-20", stressLevel: 7 },
+          { date: "2024-12-21", stressLevel: 7 },
+        ],
+        averageStressLevel: 7.18,
+        analysis: {
+          overview:
+            "Vyshnavi, your personality suggests that you are highly motivated by helping others and prefer to recharge through engaging in hobbies. You tend to stick to your original plans and have a moderate comfort level with unexpected changes. Your instinct is to act immediately when faced with challenging situations, and you value having a structured routine. Here’s how these traits reflect in your work pattern:",
+          workloadAnalysis:
+            "You have a varied workload with multiple tasks assigned over different dates. On days like December 18, where you have 12 hours allocated for 'Tasku,' your stress level peaks due to the long working hours and the task's deadline. Similarly, tasks like 'AnotherOne' and 'Inkokati' overlap, adding to your stress. It’s important to manage your time effectively to avoid overlapping tasks and long working hours.",
+          suggestions: {
+            taskManagement: [
+              "Prioritize tasks based on their deadlines and complexity to avoid last-minute rushes.",
+              "Break down larger tasks into smaller, manageable chunks to distribute the workload evenly.",
+              "Communicate with your team or manager about any overlapping tasks to adjust deadlines or allocate additional resources.",
+            ],
+            personalWellbeing: [
+              "Ensure you take regular breaks during long working hours to maintain your energy and focus.",
+              "Engage in your hobbies or relaxation techniques during your free time to recharge.",
+              "Maintain a balanced diet and exercise routine to support your overall wellbeing.",
+            ],
+            counselling: [
+              "Given your average stress level is above 7, it might be beneficial to seek counselling to manage stress more effectively.",
+              "Discuss your workload and stress levels with a counsellor to find personalized strategies for coping.",
+              "Explore stress management techniques such as mindfulness, meditation, or deep breathing exercises.",
+            ],
+          },
+        },
+      };
+  
+      // Set the hardcoded data into the state
+      setDailyStressLevels(hardcodedResponse.dailyStressLevels || []);
+      setAccordData({
+        overview: hardcodedResponse.analysis.overview || "",
+        workloadAnalysis: hardcodedResponse.analysis.workloadAnalysis || "",
+        suggestions: hardcodedResponse.analysis.suggestions || {
+          taskManagement: [],
+          personalWellbeing: [],
+          counselling: [],
+        },
+      });
+      setAverageStressLevel(hardcodedResponse.averageStressLevel);
+    } catch (error) {
+      console.error("Failed to fetch AI insights", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   useEffect(() => {
     if (userId) {
       fetchTasks();
@@ -243,29 +309,6 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       console.error(`Error ${editMode ? "updating" : "adding"} task:`, error);
   }
 };
-  const accordData = {
-    overview:
-      "Hello Trump, your stress levels indicate that you are managing a significant workload, especially around the mid-to-end of the month. It's clear that you are diligent and committed to your tasks, but it's important to balance your work and personal life to avoid burnout.",
-    workloadAnalysis:
-      "You have multiple tasks assigned with varying deadlines and hours. The task 'DummyTask' and 'TaskDummy' overlap significantly, which adds to your stress. Ensure you prioritize tasks based on their deadlines and allocate your time efficiently to avoid last-minute rushes.",
-    suggestions: {
-      "Task Management": [
-        "Prioritize tasks based on their deadlines and complexity to manage your workload better.",
-        "Break down large tasks into smaller, manageable chunks to reduce stress and increase productivity.",
-        "Use a calendar or planner to keep track of your tasks and deadlines visually.",
-      ],
-      "Personal Wellbeing": [
-        "Make sure to take regular breaks throughout the day to reduce stress and maintain focus.",
-        "Engage in activities that help you relax, such as meditation, reading, or a short walk.",
-        "Ensure you get adequate sleep each night to help your body and mind recover from the day's stress.",
-      ],
-      "Routine Optimization": [
-        "Optimize your daily routine to include time for both work and personal activities.",
-        "Consider delegating tasks if possible to reduce your workload.",
-        "Use technology to your advantage by setting reminders and using productivity apps to stay organized.",
-      ],
-    },
-  };
   const handleDeleteTask = async (taskId) => {
     try {
       await userService.deleteTask(taskId);
@@ -328,8 +371,9 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
       );
     }
   };
-  const handleAnalyseAI = () => {
-    setShowAnalysis((prev) => !prev); // Toggle between analysis and overview
+  const handleAnalyseAI = async () => {
+    setShowAnalysis(true); 
+    await fetchAIInsights();
   };
   const handleDailyHoursChange = (date, value) => {
     setDailyHours((prev) => {
@@ -403,14 +447,37 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
     plugins: {
       legend: {
         position: 'top',
+        labels: {
+          font: {
+            size: 14,
+          },
+          color: '#333', // Text color
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (tooltipItem) => {
+            const value = tooltipItem.raw;
+            const percentage = ((value / taskStatusCounts.total) * 100).toFixed(2);
+            return `${tooltipItem.label}: ${value} (${percentage}%)`;
+          },
+        },
       },
       title: {
         display: true,
         text: 'Task Completion Percentage',
+        font: {
+          size: 18,
+        },
+        color: '#333',
       },
     },
+    animation: {
+      animateScale: true,
+      animateRotate: true,
+    },
   };
-
+  
   const lineOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -592,58 +659,63 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
         </div>
   
         {tasks.length > 0 && (
-          <div className="mt-8 overflow-auto">
-            <h2 className="text-xl font-semibold mb-4">Tasks Overview</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border rounded">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-2 border">Task Name</th>
-                    <th className="px-4 py-2 border">Status</th>
-                    <th className="px-4 py-2 border">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tasks.map((task, index) => (
-                    <tr
-                      key={index}
-                      className={`text-center ${
-                        calculateStatus(task.taskEndDate, task.deadlineDate) === 0
-                          ? 'bg-green-100'
-                          : calculateStatus(task.taskEndDate, task.deadlineDate) === 1
-                          ? 'bg-yellow-100'
-                          : 'bg-red-100'
-                      }`}
-                    >
-                      <td className="px-4 py-2 border">{task.taskName}</td>
-                      <td className="px-4 py-2 border">
-                        {calculateStatus(task.taskEndDate, task.deadlineDate) === 0
-                          ? 'Completed Before Time'
-                          : calculateStatus(task.taskEndDate, task.deadlineDate) === 1
-                          ? 'Completed On Time'
-                          : 'Completed Late'}
-                      </td>
-                      <td className="px-4 py-2 border flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => handleEditTask(task)}
-                          className="text-blue-500 hover:text-blue-700 transition-all"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTask(task.taskId)}
-                          className="text-red-500 hover:text-red-700 transition-all"
-                        >
-                          <FaTrash />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+  <div className="mt-8 overflow-auto">
+    <h2 className="text-xl font-semibold mb-4">Tasks Overview</h2>
+    <div className="overflow-x-auto">
+      <table className="min-w-full bg-white border rounded shadow-sm">
+        <thead className="bg-gray-100">
+          <tr>
+            <th className="px-3 py-2 border text-left text-sm font-medium text-gray-700">Task Name</th>
+            <th className="px-3 py-2 border text-left text-sm font-medium text-gray-700">Status</th>
+            <th className="px-3 py-2 border text-center text-sm font-medium text-gray-700">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tasks.map((task, index) => (
+            <tr
+              key={index}
+              className={`${
+                calculateStatus(task.taskEndDate, task.deadlineDate) === 0
+                  ? 'bg-green-50'
+                  : calculateStatus(task.taskEndDate, task.deadlineDate) === 1
+                  ? 'bg-yellow-50'
+                  : 'bg-red-50'
+              } hover:bg-gray-50`}
+            >
+              <td className="px-3 py-1 border text-sm text-gray-800 h-10">{task.taskName}</td>
+              <td className="px-3 py-1 border text-sm text-gray-800 h-10">
+                {calculateStatus(task.taskEndDate, task.deadlineDate) === 0
+                  ? 'Completed Before Time'
+                  : calculateStatus(task.taskEndDate, task.deadlineDate) === 1
+                  ? 'Completed On Time'
+                  : 'Completed Late'}
+              </td>
+              <td className="px-3 py-1 border text-center h-10">
+                <div className="flex justify-center gap-2">
+                  <button
+                    onClick={() => handleEditTask(task)}
+                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs inline-flex items-center gap-1 shadow hover:bg-blue-600 transition-all"
+                  >
+                    <FaEdit className="text-sm" />
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTask(task.taskId)}
+                    className="bg-red-500 text-white px-2 py-1 rounded text-xs inline-flex items-center gap-1 shadow hover:bg-red-600 transition-all"
+                  >
+                    <FaTrash className="text-sm" />
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+
       </div>
   
       {/* Right Card */}
@@ -652,7 +724,7 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
           <div className="flex-1 p-8 bg-white rounded-lg shadow-md flex flex-col justify-center items-center overflow-auto">
             <div
               className="w-full h-full flex items-center justify-center"
-              style={{ height: '60%' }}
+              style={{ height: '80%' }}
             >
               <Pie data={pieData} options={pieOptions} />
             </div>
@@ -660,75 +732,86 @@ export const DashboardPageContent = ({ userId, setUserId }) => {
           <div className="relative flex-1 p-8 bg-white rounded-lg shadow-md flex flex-col justify-center items-center overflow-auto">
   {/* Analyse AI Magic Button */}
   <button
-    onClick={handleAnalyseAI} // Add your toggle logic
-    className="absolute top-4 right-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 shadow-md transition-all"
-  >
-    Analyse AI Magic
-  </button>
+  onClick={handleAnalyseAI} // Add your toggle logic
+  className="absolute top-4 right-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 shadow-md transition-all flex items-center gap-2"
+>
+  Analyse AI <FaMagic size={16} /> {/* Magic Icon */}
+</button>
 
   {/* Line Chart */}
   <div
-    className="w-full h-full flex items-center justify-center"
-    style={{ height: "60%", position: "relative" }}
-  >
+  className="w-full h-full flex flex-col items-center justify-center text-center px-4"
+  style={{ height: "60%", position: "relative" }}
+>
+  {showAnalysis ? (
     <Line data={lineData} options={lineOptions} />
-  </div>
+  ) : (
+    <div className="text-gray-600">
+      <h3 className="text-xl font-bold mb-4 text-blue-600">
+        Unlock Your Path to a Healthier and Happier Workplace!
+      </h3>
+      <p className="mb-4">
+        Imagine a workplace where stress is understood, managed, and reduced. 
+        With our AI-Driven Employee Wellbeing and Productivity Tracker, 
+        you have the power to achieve this. 
+      </p>
+      <p className="mb-4">
+        This cutting-edge tool leverages Azure AI Services to analyze stress patterns, uncover meaningful insights, 
+        and provide personalized strategies that help you thrive. 
+      </p>
+      <p className="mb-6">
+        Take the first step toward enhancing your productivity and finding balance in your work-life journey. 
+        The solution is here—tailored for your success and happiness.
+      </p>
+      <p className="font-semibold text-lg">
+        Click <span className="text-blue-600 font-bold">"Analyse AI Magic"</span> to explore your stress insights and unlock actionable recommendations!
+      </p>
+    </div>
+  )}
+</div>
+
 </div>
         </div>
       )}
-        </>
+      </>
       )}
     </div>
-    <div className="flex flex-row items-start justify-center p-1 bg-gray-100 gap-2">
-        <div className="w-100 ml-4 mr-4 mb-2 bg-gray-100 rounded-lg shadow-md flex flex-col overflow-auto">
-          {/* <h2 className="text-3xl font-semibold text-gray-800 text-center mb-8 mt-2">Overview</h2>
-          <p className="ml-7 mr-7">Hello Trump, your stress levels indicate that you are managing a significant workload, especially around the mid-to-end of the month. It's clear that you are diligent and committed to your tasks, but it's important to balance your work and personal life to avoid burnout.</p> */}
-          <Accordion>
-          <Accordion.Item eventKey="0">
-              <Accordion.Header>
-              <div className="font-semibold text-gray-800 text-center w-full m-2">
-                Overview
-              </div>
-              </Accordion.Header>
-              <Accordion.Body>{accordData.overview}</Accordion.Body>
-            </Accordion.Item>
-            {/* Workload Analysis */}
-            <Accordion.Item eventKey="1">
-              <Accordion.Header>
-              <div className="font-semibold text-gray-800 text-center w-full m-2">
-                Workload Analysis
-              </div>
-              </Accordion.Header>
-              <Accordion.Body>{accordData.workloadAnalysis}</Accordion.Body>
-            </Accordion.Item>
-            {/* className="font-semibold text-gray-800 cursor-pointer text-center" */}
-            {/* Suggestions */}
-            <Accordion.Item eventKey="2">
-            <Accordion.Header>
-              <div className="font-semibold text-gray-800 text-center w-full m-2">
-                Suggestions
-              </div>
-            </Accordion.Header>
-              <Accordion.Body>
-                <Accordion>
-                  {Object.entries(accordData.suggestions).map(([key, values], index) => (
-                    <Accordion.Item eventKey={index.toString()} key={key}>
-                      <Accordion.Header>{key.replace(/([A-Z])/g, " $1")}</Accordion.Header>
-                      <Accordion.Body>
-                        <ul className="list-disc pl-5">
-                          {values.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </Accordion.Body>
-                    </Accordion.Item>
-                  ))}
-                </Accordion>
-              </Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
+
+      {/* Down Section */}
+<div> 
+{showAnalysis && (
+  <div className="w-full p-4 bg-gray-100">
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h2 className="text-2xl font-semibold text-center mb-4">Overview</h2>
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold mb-2 text-gray-800">Summary</h3>
+        <p className="text-gray-600">{accordData.overview || "No data available"}</p>
+      </div>
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold mb-2 text-gray-800">Workload Analysis</h3>
+        <p className="text-gray-600">{accordData.workloadAnalysis || "No data available"}</p>
+      </div>
+      <div>
+        <h3 className="text-xl font-semibold mb-2 text-gray-800">Suggestions</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {Object.entries(accordData.suggestions || {}).map(([category, suggestions], index) => (
+            <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm">
+              <h4 className="font-semibold text-blue-500 mb-2">{category.replace(/([A-Z])/g, " $1")}</h4>
+              <ul className="list-disc list-inside text-gray-600">
+                {suggestions.map((suggestion, idx) => (
+                  <li key={idx}>{suggestion}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
-      </> 
+    </div>
+  </div>
+)}
+
+      </div>
+
+    </> 
   );
 };

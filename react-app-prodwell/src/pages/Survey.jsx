@@ -32,6 +32,7 @@ const SurveyPageContent = ({ userId, setUserId }) => {
   useEffect(() => {
     const fetchSurveyData = async () => {
       try {
+        // Fetch the survey questions
         const questionsResponse = await userService.getPersonalityQuestions();
         const validQuestions = questionsResponse.data.filter(
           (item) => item.question && item.type && item.options
@@ -43,50 +44,73 @@ const SurveyPageContent = ({ userId, setUserId }) => {
           type: item.type,
           options: item.options, // May not apply for range type
         }));
-    
+     // Set the formatted questions
+     setQuestions(formattedQuestions);
         // Fetch the user's previously submitted answers
         const answersResponse = await userService.getUserSurveyAnswers(userId);
     
-        const prefilledAnswers = (answersResponse.data.answers || []).reduce((acc, answer) => {
-          const question = formattedQuestions.find((q) => q.questionId === answer.questionId);
+        if (answersResponse.status === 200) {
+          // Process and pre-fill the answers
+          const prefilledAnswers = (answersResponse.data.answers || []).reduce(
+            (acc, answer) => {
+              const question = formattedQuestions.find(
+                (q) => q.questionId === answer.questionId
+              );
     
-          if (question.type === 'range') {
-            // Ensure valid numerical value for range questions
-            acc[answer.questionId] = parseInt(answer.answer[0], 10) || 1; // Default to 1 if invalid
-          } else if (question.type === 'multiSelect') {
-            acc[answer.questionId] = answer.answer.filter((ans) =>
-              question.options.includes(ans)
-            );
-            const otherAnswers = answer.answer.filter((ans) =>
-              !question.options.includes(ans)
-            );
-            if (otherAnswers.length > 0) {
-              acc[answer.questionId] = [
-                ...(acc[answer.questionId] || []),
-                'Other (Please specify)',
-              ];
-              acc[`other-${answer.questionId}`] = otherAnswers.join(', ');
-            }
-          } else {
-            const isValidAnswer = question.options.includes(answer.answer[0]);
-            if (isValidAnswer) {
-              acc[answer.questionId] = answer.answer[0];
-            } else {
-              acc[answer.questionId] = 'Other (Please specify)';
-              acc[`other-${answer.questionId}`] = answer.answer[0];
-            }
-          }
-          return acc;
-        }, {});
+              if (!question) {
+                console.warn(`No matching question found for questionId: ${answer.questionId}`);
+                return acc;
+              }
     
-        setQuestions(formattedQuestions);
-        setSelectedAnswers(prefilledAnswers); // Pre-fill the selected answers
+              switch (question.type) {
+                case "range":
+                  // Ensure valid numerical value for range questions
+                  acc[answer.questionId] = parseInt(answer.answer[0], 10) || 1; // Default to 1 if invalid
+                  break;
+    
+                case "multiSelect":
+                  const validAnswers = answer.answer.filter((ans) =>
+                    question.options.includes(ans)
+                  );
+                  const otherAnswers = answer.answer.filter(
+                    (ans) => !question.options.includes(ans)
+                  );
+    
+                  acc[answer.questionId] = validAnswers;
+                  if (otherAnswers.length > 0) {
+                    acc[answer.questionId].push("Other (Please specify)");
+                    acc[`other-${answer.questionId}`] = otherAnswers.join(", ");
+                  }
+                  break;
+    
+                default:
+                  const isValidAnswer = question.options.includes(answer.answer[0]);
+                  if (isValidAnswer) {
+                    acc[answer.questionId] = answer.answer[0];
+                  } else {
+                    acc[answer.questionId] = "Other (Please specify)";
+                    acc[`other-${answer.questionId}`] = answer.answer[0];
+                  }
+              }
+    
+              return acc;
+            },
+            {}
+          );
+    
+          setSelectedAnswers(prefilledAnswers); // Pre-fill the selected answers
+        } else {
+          console.warn(
+            `Answers response returned with non-200 status: ${answersResponse.status}`
+          );
+        }
+    
+       
       } catch (error) {
         console.error("Error fetching survey data:", error);
       }
     };
     
-  
     fetchSurveyData();
   }, [userId]);
   
@@ -230,22 +254,34 @@ const SurveyPageContent = ({ userId, setUserId }) => {
       })),
     };
   
-    try {
-      // Check if user already exists in personality answers
-      const existingAnswersResponse = await userService.getUserSurveyAnswers(userId);
-      if (existingAnswersResponse?.data?.answers?.length > 0) {
-        // If existing user, send a PUT request
-        await userService.updatePersonalityAnswers(payload);
-        console.log("Survey updated successfully.");
-      } else {
-        // If new user, send a POST request
-        await userService.submitPersonalityAnswers(payload);
-        console.log("Survey submitted successfully.");
-      }
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Error submitting or updating survey:', error);
+    
+      try {
+  // Check if user already exists in personality answers
+  const existingAnswersResponse = await userService.getUserSurveyAnswers(userId).catch((error) => {
+    if (error.response && error.response.status === 404) {
+      return { status: 404 }; // Mimic a successful response with a 404 status
     }
+    throw error; // Rethrow other errors
+  });
+
+  if (existingAnswersResponse.status === 200) {
+    // Existing entry found: update survey answers
+    await userService.updatePersonalityAnswers(payload);
+    console.log("Survey updated successfully.");
+  } else if (existingAnswersResponse.status === 404) {
+    // Entry not found: submit new survey answers
+    await userService.submitPersonalityAnswers(payload);
+    console.log("Survey submitted successfully.");
+  } else {
+    console.warn(`Unexpected response status: ${existingAnswersResponse.status}`);
+  }
+
+  navigate('/dashboard');
+} catch (error) {
+  console.error("Error submitting or updating survey:", error);
+}
+
+         
   };
   
   
