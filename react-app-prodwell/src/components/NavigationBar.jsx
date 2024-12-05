@@ -71,7 +71,7 @@ export const NavigationBar = () => {
                     <Nav.Link
                         onClick={() => navigate('/dashboard')}
                         className={`${location.pathname === "/dashboard"
-                            ? "bg-[#6200ea] text-white rounded-lg px-3"
+                            ? "bg-[#F8F8FA] font-semibold px-3"
                             : "text-black"
                         }`}
                     >Dashboard</Nav.Link>
@@ -79,7 +79,7 @@ export const NavigationBar = () => {
                         <Nav.Link
                             onClick={() => navigate('/analytics')}
                             className={`${location.pathname === "/analytics"
-                                ? "bg-[#6200ea] text-white rounded-lg px-3"
+                                ? "bg-[#F8F8FA] font-semibold px-2"
                                 : "text-black"
                             }`}
                         >Analytics</Nav.Link>
@@ -87,7 +87,7 @@ export const NavigationBar = () => {
                     <Nav.Link
                         href="/aboutus"
                         className={`${location.pathname === "/aboutus"
-                            ? "bg-[#6200ea] text-white rounded-lg px-3"
+                            ? "bg-[#F8F8FA] font-semibold px-2"
                             : "text-black"
                         }`}
                     >About Us</Nav.Link>

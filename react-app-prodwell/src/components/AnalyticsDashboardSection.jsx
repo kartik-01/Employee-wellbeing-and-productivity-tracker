@@ -10,10 +10,10 @@ const AnalyticsDashboardSection = () => (
     
     {/* Text Section */}
     <div className="w-full md:w-1/2 text-left md:text-left pl-12 p-6">
-      <h2 className="text-3xl font-semibold text-gray-800">Analytics Dashboard</h2>
+      <h2 className="text-3xl font-semibold text-gray-800">Employee Insights Dashboard</h2>
       <p className="text-lg text-gray-600 mt-4">
-        Gain valuable insights into client interactions including <br />
-        views, engagement, and conversion rates.
+      Gain valuable insights into employee wellbeing and productivity,  <br />
+      including stress levels,task completion rates, and personalized recommendations for enhancing work-life balance
       </p>
     </div>
   </section>
