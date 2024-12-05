@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/analytics")
-@CrossOrigin(origins = "${cors.allowed-origins}")
+//@CrossOrigin(origins = "${cors.allowed-origins}")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AnalyticsController {
     
     @Autowired

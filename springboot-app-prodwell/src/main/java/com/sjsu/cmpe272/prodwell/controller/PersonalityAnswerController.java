@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@CrossOrigin(origins = "${cors.allowed-origins}")
+//@CrossOrigin(origins = "${cors.allowed-origins}")
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/personalityAnswers")
 public class PersonalityAnswerController {
