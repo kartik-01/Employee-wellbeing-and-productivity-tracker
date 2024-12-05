@@ -31,5 +31,5 @@ Below is a block diagram of the architecture:
 * Azure AD B2C: For secure user authentication.<br/>
 * Backend: Spring Boot for managing business logic and data flow.<br/>
 * Database: MongoDB for storing user data, productivity metrics and survey data.<br/>
-* AI Services: Azure AI Services for analyzing data and providing personalized recommendations.<br/>
+* AI Services: A learning and modeling algorithm, in the context of machine learning, is a set of instructions or procedures that analyzes data to identify patterns and relationships, allowing a computer to "learn" from the data and create a mathematical model that can then be used to make predictions on new, unseen data;<br/>
 
