@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 //@CrossOrigin(origins = "${cors.allowed-origins}")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://prodwell-tracker.vercel.app")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {

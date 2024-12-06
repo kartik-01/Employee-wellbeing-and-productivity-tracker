@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 //@CrossOrigin(origins = "${cors.allowed-origins}")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://prodwell-tracker.vercel.app")
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/analytics")
 //@CrossOrigin(origins = "${cors.allowed-origins}")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://prodwell-tracker.vercel.app/")
 public class AnalyticsController {
     
     @Autowired
