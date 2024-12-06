@@ -2,6 +2,7 @@
   "name": "prodwell",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "@azure/msal-browser": "^3.23.0",
     "@azure/msal-react": "^2.0.22",
